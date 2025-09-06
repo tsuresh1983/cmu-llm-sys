@@ -1,0 +1,9 @@
+.DS_Store
+.pytest_cache
+.hypothesis
+*.egg-info
+*.zip
+**/__pycache__/*
+.history
+*.so
+.vscode
