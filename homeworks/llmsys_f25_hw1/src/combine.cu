@@ -467,35 +467,41 @@ __global__ void MatrixMultiplyKernel(
     int m = a_shape[1];
     int n = a_shape[2];
     int p = b_shape[2];
-    int row = blockIdx.y * blockDim.y + threadIdx.y;
-    int col = blockIdx.x * blockDim.x + threadIdx.x;
+
+    int row = blockIdx.x * blockDim.x + threadIdx.x;
+    int col = blockIdx.y * blockDim.y + threadIdx.y;
     int ty = threadIdx.y;
     int tx = threadIdx.x;
-    float sum = 0;
+    float sum = 0.0f;
+
     for (int tile = 0; tile < (n + TILE - 1) / TILE; ++tile) {
-        a_shared[ty][tx] = 0.0f;
-        b_shared[ty][tx] = 0.0f;
         int a_row = row;
-        int a_col = tile * TILE + tx;
+        int a_col = tile * TILE + ty;
         if (a_row < m && a_col < n) {
             int a_pos = batch * a_batch_stride + a_row * a_strides[1] + a_col * a_strides[2];
-            a_shared[ty][tx] = a_storage[a_pos];
-        } 
-        int b_row = tile * TILE + ty;
+            a_shared[tx][ty] = a_storage[a_pos];
+        } else {
+            a_shared[tx][ty] = 0.0f;
+        }
+
+        int b_row = tile * TILE + tx;
         int b_col = col;
         if (b_row < n && b_col < p) {
             int b_pos = batch * b_batch_stride + b_row * b_strides[1] + b_col * b_strides[2];
-            b_shared[ty][tx] = b_storage[b_pos];
+            b_shared[tx][ty] = b_storage[b_pos];
+        } else {
+            b_shared[tx][ty] = 0.0f;
         }
         __syncthreads();
         
-        for (int k = 0; k < TILE; ++k) {
-            sum += a_shared[ty][k] * b_shared[k][tx];
+        for (int k = 0; k < TILE; k++) {
+          sum += a_shared[tx][k] * b_shared[k][ty];
         }
 
         __syncthreads();
     }
 
+    
     if (row < m && col < p) {
         int out_pos = batch * out_batch_stride + row * out_strides[1] + col * out_strides[2];
         out[out_pos] = sum;

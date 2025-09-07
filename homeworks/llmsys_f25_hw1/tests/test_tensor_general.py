@@ -157,11 +157,7 @@ def test_cuda_matmul_transpose(
     y = minitorch.tensor(y1, backend=shared[backend])
     
     z = transpose(x) @ y
-    with np.printoptions(threshold=np.inf, linewidth=np.inf):
-        print(z)
     np_out = np.array(x1).T @ np.array(y1)
-    with np.printoptions(threshold=np.inf, linewidth=np.inf):
-        print(np_out.astype(np.float32))
     np.testing.assert_allclose(
       z.to_numpy(), np_out,
       atol=1e-5, rtol=1e-5)
