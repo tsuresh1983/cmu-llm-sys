@@ -11,3 +11,8 @@
 [TensorFlow paper](www.usenix.org/system/files/conference/osdi16/osdi16-abadi.pdf)
 
 [Mini DL framework](https://github.com/llmsystem//llmsys_code_examples/tree/main/mini_tensorflow)
+
+
+### Class Notes
+
+
