@@ -52,19 +52,19 @@ void print_result(vector<float> &a, vector<float> &b, vector<float> &c, int N) {
 
 int main() {
 
-    int n = 1024;
-
+  int n = 1024;
+  int iterations = 1000000;
+  for(int i=0; i<iterations;i++){
     // Host vectors
     vector<float> h_a(n);
     vector<float> h_b(n);
     vector<float> h_c(n);
-
     // Initialize matrices
     generate(h_a.begin(), h_a.end(), []() { return rand() % 100; });
     generate(h_b.begin(), h_b.end(), []() { return rand() % 100; });
 
     vecAdd(h_a.data(), h_b.data(), h_c.data(), n);
-
     print_result(h_a, h_b, h_c, n);
+  }
 }
 
