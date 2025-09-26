@@ -13,3 +13,7 @@
 [LLAMA Tokenizer demo](https://belladoreai.github.io/llama-tokenizer-js/example-demo/build/)
 
 [GPT Tokenizer demo](https://koala.sh/tools/free-gpt-tokenizer)
+
+[Decoding example](https://github.com/llmsystem/llmsys_code_examples/blob/main/decoding/decoding.ipynb)
+
+[VOLT](https://github.com/Jingjing-NLP/VOLT)

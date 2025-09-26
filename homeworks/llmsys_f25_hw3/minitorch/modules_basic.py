@@ -33,7 +33,7 @@ class Embedding(Module):
         self.num_embeddings = num_embeddings # Vocab size
         self.embedding_dim  = embedding_dim  # Embedding Dimension
         ### BEGIN ASSIGN3_2
-        raise NotImplementedError
+        self.weights = Parameter(tensor_from_numpy(np.random.uniform(0, 1, size=(num_embeddings, embedding_dim)), backend=backend))
         ### END ASSIGN3_2
     
     def forward(self, x: Tensor):
@@ -47,7 +47,12 @@ class Embedding(Module):
         """
         bs, seq_len = x.shape
         ### BEGIN ASSIGN3_2
-        raise NotImplementedError
+        oh = one_hot(x, self.num_embeddings)
+        oh_flat = oh.view(bs * seq_len, self.num_embeddings)
+        emb_flat = oh_flat @ self.weights.value
+        emb = emb_flat.view(bs, seq_len, self.embedding_dim)
+        return emb
+        # raise NotImplementedError
         ### END ASSIGN3_2
 
     
@@ -71,7 +76,12 @@ class Dropout(Module):
             output : Tensor of shape (*)
         """
         ### BEGIN ASSIGN3_2
-        raise NotImplementedError
+        if self.p_dropout == 0. or not self.training:
+            return x
+        rands = np.random.uniform(0, 1, size=x.to_numpy().shape)
+        masks = (rands > self.p_dropout).astype(np.float32)
+        return (x * tensor_from_numpy(masks)) / (1.0 - self.p_dropout)
+        # raise NotImplementedError
         ### END ASSIGN3_2
 
 
@@ -91,7 +101,19 @@ class Linear(Module):
         """
         self.out_size = out_size
         ### BEGIN ASSIGN3_2
-        raise NotImplementedError
+        import math
+        bound = 1.0 / math.sqrt(in_size)
+        w = np.random.uniform(-bound, bound, size=(in_size, out_size))
+        self.weights = Parameter(tensor_from_numpy(w, backend=backend, requires_grad=True))
+        self.apply_bias = bias
+        if bias:
+            b = np.random.uniform(-bound, bound, size=(out_size,))
+            self.bias = Parameter(tensor_from_numpy(b, backend=backend, requires_grad=True))
+        else:
+            b = zeros_tensor_from_numpy(shape=(out_size,), backend=backend)
+            b.requires_grad_(True)
+            self.bias = Parameter(b)
+        # raise NotImplementedError
         ### END ASSIGN3_2
 
     def forward(self, x: Tensor):
@@ -103,9 +125,27 @@ class Linear(Module):
         Returns:
             output : Tensor of shape (n, out_size)
         """
-        batch, in_size = x.shape
         ### BEGIN ASSIGN3_2
-        raise NotImplementedError
+        if len(x.shape) == 3:
+            batch, seq_len, in_size = x.shape
+            x_ = x.view(batch * seq_len, in_size)
+            w = self.weights.value.view(in_size, self.out_size)
+            out_ = x_ @ w
+            if self.apply_bias:
+                b = self.bias.value.view(1, self.out_size)
+                out_ = out_ + b
+            out = out_.view(batch, seq_len, self.out_size)
+        else:
+            batch, in_size = x.shape
+            w = self.weights.value.view(in_size, self.out_size)
+            out = x @ w
+            if self.apply_bias:
+                b = self.bias.value.view(1, self.out_size)
+                out = out + b
+
+        return out
+        
+        # raise NotImplementedError
         ### END ASSIGN3_2
 
 
@@ -125,7 +165,13 @@ class LayerNorm1d(Module):
         self.dim = dim
         self.eps = eps
         ### BEGIN ASSIGN3_2
-        raise NotImplementedError
+        wt = ones_tensor_from_numpy((dim,), backend=backend)
+        wt.requires_grad_(True)
+        self.weights = Parameter(wt)
+        b = zeros_tensor_from_numpy((dim,), backend=backend)
+        b.requires_grad_(True)
+        self.bias = Parameter(b)
+        # raise NotImplementedError
         ### END ASSIGN3_2
 
     def forward(self, x: Tensor) -> Tensor:
@@ -141,5 +187,10 @@ class LayerNorm1d(Module):
         """
         batch, dim = x.shape
         ### BEGIN ASSIGN3_2
-        raise NotImplementedError
+        mean = x.mean(dim=1).view(batch, 1)
+        var = x.var(dim=1).view(batch, 1)
+        x_normalized = (x - mean) / (var + self.eps) ** 0.5
+        ln = self.weights.value * x_normalized + self.bias.value
+        return ln.view(batch, dim)
+        # raise NotImplementedError
         ### END ASSIGN3_2

@@ -395,7 +395,7 @@ __global__ void reduceKernel(
         a_index[reduce_dim] = i;
         int a_pos = index_to_position(a_index, a_strides, shape_size);
         acc = fn(fn_id, acc, a_storage[a_pos]);
-        printf("a: %d sum: %d\n", a_storage[a_pos], acc);
+        // printf("a: %d sum: %d\n", a_storage[a_pos], acc);
     }   
     
     // 5. Write the reduced value to out memory
