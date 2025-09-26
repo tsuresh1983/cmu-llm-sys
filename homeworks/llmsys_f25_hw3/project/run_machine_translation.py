@@ -309,7 +309,7 @@ def generate(
             )
             logits: minitorch.Tensor = model(input_tensor)
             last_idx = logits.shape[1] - 1
-            next_token_logits = logits[0, last_idx, :]
+            next_token_logits = minitorch.tensor_from_numpy(logits.view(logits.shape[1], logits.shape[2]).to_numpy()[last_idx, :])
             one_hot = minitorch.nn.argmax(next_token_logits, dim=0)
             gen_id = int((one_hot * minitorch.tensor(list(range(len(tokenizer.vocab))),
                 backend=backend)).sum()[0])
