@@ -8,3 +8,4 @@
 *.so
 .vscode
 **/*.out
+**/workdir_*
