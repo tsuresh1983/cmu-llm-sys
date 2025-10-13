@@ -344,16 +344,73 @@ void launch_attn_softmax_bw(float *out_grad,
   dim3 grid_dim((rows + warps_per_block - 1) / warps_per_block);
   dim3 block_dim(WARP_SIZE, warps_per_block);
   // BEGIN ASSIGN4_1_2
+  int total_size = rows * softmax_len * sizeof(float);
+  float *d_soft_inp, *d_out_grad;
+  cudaError_t err;
+  printf("DEBUG: allocating memory for grad and input\n");
+  cudaMalloc((void **)&d_soft_inp, total_size);
+  cudaMalloc((void **)&d_out_grad, total_size);
   
-  
+  err = cudaMemcpy(d_soft_inp, soft_inp, total_size, cudaMemcpyHostToDevice);
+  if (err != cudaSuccess) {
+    fprintf(stderr, "cudaMalloc soft_inp failed: %s\n", cudaGetErrorString(err));
+    exit(EXIT_FAILURE);
+  }
+
+  err = cudaMemcpy(d_out_grad, out_grad, total_size, cudaMemcpyHostToDevice);
+  if (err != cudaSuccess) {
+    fprintf(stderr, "cudaMalloc out_grad failed: %s\n", cudaGetErrorString(err));
+    exit(EXIT_FAILURE);
+  }
+  printf("DEBUG: About to launch kernel with softmax_len: %d\n", softmax_len);
   // Launch kernel
   // Hint: use ker_attn_softmax_bw<float, ITERATIONS> depending on softmax_len
+  if (softmax_len <= 32) {
+    ker_attn_softmax_bw<float, 1><<<grid_dim, block_dim, 0, stream>>>(
+        d_out_grad, d_soft_inp, softmax_len);
+  } else if (softmax_len <= 64) {
+    ker_attn_softmax_bw<float, 2><<<grid_dim, block_dim, 0, stream>>>(
+        d_out_grad, d_soft_inp, softmax_len);
+  } else if (softmax_len <= 128) {
+    ker_attn_softmax_bw<float, 4><<<grid_dim, block_dim, 0, stream>>>(
+        d_out_grad, d_soft_inp, softmax_len);
+  } else if (softmax_len <= 256) {
+    ker_attn_softmax_bw<float, 8><<<grid_dim, block_dim, 0, stream>>>(
+        d_out_grad, d_soft_inp, softmax_len);
+  } else if (softmax_len <= 512) {
+    ker_attn_softmax_bw<float, 16><<<grid_dim, block_dim, 0, stream>>>(
+        d_out_grad, d_soft_inp, softmax_len);
+  } else if (softmax_len <= 1024) {
+    ker_attn_softmax_bw<float, 32><<<grid_dim, block_dim, 0, stream>>>(
+        d_out_grad, d_soft_inp, softmax_len);
+  } else if (softmax_len <= 2048) {
+    ker_attn_softmax_bw<float, 64><<<grid_dim, block_dim, 0, stream>>>(
+        d_out_grad, d_soft_inp, softmax_len);
+  } else {
+    cudaFree(d_soft_inp);
+    cudaFree(d_out_grad);
+    throw std::runtime_error(
+        "Sequence length greater than 2048 is currently not supported");
+  }
   
+  printf("DEBUG: kernel finished\n");
   // Copy back to the host
-  
-  
+  cudaMemcpy(out_grad, d_out_grad, total_size, cudaMemcpyDeviceToHost);
+  cudaDeviceSynchronize();
+
+  // Check CUDA execution
+  err = cudaGetLastError();
+  if (err != cudaSuccess) {
+    cudaFree(d_soft_inp);
+    cudaFree(d_out_grad);
+    fprintf(stderr, "launch_attn_softmax_bw Error: %s\n", cudaGetErrorString(err));
+    exit(EXIT_FAILURE);
+  }
+  cudaDeviceSynchronize();
 
   // Free memory on device
+  cudaFree(d_soft_inp);
+  cudaFree(d_out_grad);
   // END ASSIGN4_1_2
 
 }}
