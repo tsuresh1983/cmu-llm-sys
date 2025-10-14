@@ -45,18 +45,67 @@ __global__ void ker_layer_norm(T *ln_res, T *vars, T *means, const T *inp,
   // 3. Compute layernorm result with reinterpret_cast by casting to float4 for speedup
   
   // Step 1
-  float l_sum = 0;
+  const int token_per_reduce = 1;
+  float l_sum[token_per_reduce];
+  float l_sum_sq[token_per_reduce];
+  l_sum[0] = 0.f;
+  l_sum_sq[0] = 0.f;
+  //printf("Debug0\n");
   const float4 *inp_f4 = reinterpret_cast<const float4 *>(inp) + blockIdx.x * hidden_size;  
   for (uint idx = threadIdx.x; idx < hidden_size; idx += blockDim.x) {
     float4 val = inp_f4[idx];
-    l_sum += val.x + val.y + val.z + val.w;
+    l_sum[0] += val.x + val.y + val.z + val.w;
+    l_sum_sq[0] += (val.x * val.x) + (val.y * val.y) + (val.z * val.z) + (val.w * val.w);
+  }
+  //printf("Debug1\n");
+  // Step 2
+    
+  blockReduce<ReduceType::kSum, token_per_reduce>(l_sum);
+  blockReduce<ReduceType::kSum, token_per_reduce>(l_sum_sq);
+
+  __shared__ float s_sum;
+  __shared__ float s_sum_sq;
+  if (threadIdx.x == 0) {
+      s_sum = l_sum[0];
+      s_sum_sq = l_sum_sq[0];
+  }
+  __syncthreads();
+
+  //printf("Debug2\n");
+  int total_elements = hidden_size * 4;
+  float mean = s_sum / total_elements;
+  float variance = (s_sum_sq / total_elements) - (mean * mean);
+  float inv_std = rsqrtf(variance + LN_EPSILON);
+
+  if(threadIdx.x == 0) {
+    if (means) means[blockIdx.x] = mean;
+    if (vars)  vars[blockIdx.x] = variance;
   }
 
-  // Step 2
-
+  if (threadIdx.x == 0 && blockIdx.x == 0) {
+    printf("hidden_size in kernel: %d, total_elements: %d\n", hidden_size, total_elements);
+  }
   // Step 3
-  
-  assert(false && "Not Implemented");
+  //const float4 *inp_ftest = reinterpret_cast<const float4 *>(inp);
+  float4 *ln_res_f4 = reinterpret_cast<float4 *>(ln_res) + blockIdx.x * hidden_size;
+  const float4 *scale_f4 = reinterpret_cast<const float4 *>(scale);
+  const float4 *bias_f4 = reinterpret_cast<const float4 *>(bias);
+  //printf("Debug3\n");
+  for (uint idx = threadIdx.x; idx < hidden_size; idx += blockDim.x) {
+    float4 val = inp_f4[idx];
+    float4 s = scale_f4[idx];
+    float4 b = bias_f4[idx];
+
+    float4 result;
+    result.x = (val.x - mean) * inv_std * s.x + b.x;
+    result.y = (val.y - mean) * inv_std * s.y + b.y;
+    result.z = (val.z - mean) * inv_std * s.z + b.z;
+    result.w = (val.w - mean) * inv_std * s.w + b.w;
+
+    ln_res_f4[idx] = result;
+  }
+
+  //assert(false && "Not Implemented");
   /// END ASSIGN4_2_1
 }
 
