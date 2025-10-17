@@ -54,7 +54,9 @@ def test_launch_layernorm_bw():
       inp_grad = torch.tensor(inp_mt.grad.to_numpy(), dtype=torch.float32).cuda()
       gamma_grad = torch.tensor(gamma_mt.grad.to_numpy(), dtype=torch.float32).cuda()
       betta_grad = torch.tensor(beta_mt.grad.to_numpy(), dtype=torch.float32).cuda()
-        
+      # print("*" * 100)
+      # print(inp_grad)
+      # print("*" * 100)
       return [gamma_grad, betta_grad, inp_grad], end_time - start_time
 
     def baseline():
@@ -81,7 +83,9 @@ def test_launch_layernorm_bw():
       inp_grad = torch.tensor(dinp.to_numpy(), dtype=torch.float32).cuda()
       gamma_grad = torch.tensor(f_gamma_grad.to_numpy(), dtype=torch.float32).cuda()
       betta_grad = torch.tensor(f_betta_grad.to_numpy(), dtype=torch.float32).cuda()
-
+      # print("*" * 100)
+      # print(inp_grad)
+      # print("*" * 100)
       return kt.norm_res_list(gamma_grad, betta_grad, inp_grad), end_time - start_time
 
     return custom, baseline

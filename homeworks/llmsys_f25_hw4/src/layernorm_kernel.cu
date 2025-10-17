@@ -202,41 +202,122 @@ means: [batch_size * seq_len], mean of ln forward,
 (gamma && betta) ^ (vars && means) should be true
 */
 template <typename T>
+__global__ void working_ker_ln_bw_dgamma_dbetta(T *gamma_grad, T *betta_grad,
+                                        const T *out_grad,
+                                        const T *inp, const T *gamma,
+                                        const T *betta, const T *vars,
+                                        const T *means, int rows, int width) {
+  // Each thread handles columns starting at tid_x, stepping by stride.
+  int tid_x = blockIdx.x * blockDim.x + threadIdx.x;
+  int stride = gridDim.x * blockDim.x;
+
+  for (int col = tid_x; col < width; col += stride) {
+    // Use double for accumulation to avoid catastrophic FP error
+    double dbetta_sum_d = 0.0;
+    double dgamma_sum_d = 0.0;
+
+    for (int row = 0; row < rows; ++row) {
+      int idx = row * width + col;
+      float dout = out_grad[idx];
+
+      float xhat;
+      if (means != nullptr) {
+        float mean = means[row];
+        // match baseline: std = sqrt(var), so rsqrt(var) without epsilon is closer
+        float rsqrt_var = 1.0f / sqrtf(vars[row]);
+        xhat = (inp[idx] - mean) * rsqrt_var;
+      } else {
+        // if means==nullptr, inp is post-layernorm output, and betta/gamma exist
+        xhat = (inp[idx] - betta[col]) / gamma[col];
+      }
+      dbetta_sum_d += (double)dout;
+      dgamma_sum_d += (double)(xhat * dout);
+    }
+
+    // unique writer per column => direct store (no atomics). This is safe with your current
+    // grid/block launch (gridDim.x * blockDim.x >= width when using the default launch),
+    // and even if grid is undersized the mapping used above ensures uniqueness.
+    betta_grad[col] = static_cast<float>(dbetta_sum_d);
+    gamma_grad[col] = static_cast<float>(dgamma_sum_d);
+  }
+}
+
+
+template <typename T>
 __global__ void ker_ln_bw_dgamma_dbetta(T *gamma_grad, T *betta_grad,
                                         const T *out_grad,
                                         const T *inp, const T *gamma,
                                         const T *betta, const T *vars,
                                         const T *means, int rows, int width) {
 
-  /// BEGIN ASSIGN4_2_2
-  /// TODO
-  // Hints:
-  // 1. Compute the partial gradients by looping across inp rows
-  // 2. Store the partial gradients in the shared memory arrays
-  // 3. Compute the reduce sum of the shared memory arrays with g.shfl_down
-  //      -> More hints about `g.shfl_down`:
-  //      -> https://developer.nvidia.com/blog/cooperative-groups/#:~:text=Using%20thread_block_tile%3A%3Ashfl_down()%20to%20simplify%20our%20warp%2Dlevel%20reduction%20does%20benefit%20our%20code%3A%20it%20simplifies%20it%20and%20eliminates%20the%20need%20for%20shared%20memory
-  //      -> The highlighted line gives you a conceptual understanding of what the g.shfl_down is doing. Usually, the threads inside a block need to load everything to shared memory and work together to reduce the result (like what you have implemented in the hw1 for reduce function). 
-  //      -> Now g.shfl_down helps you do so without consuming any shared memory. g.shfl_down makes it more efficient.
-  // 4. Assign the final result to the correct position in the global output
-
   __shared__ float betta_buffer[TILE_DIM][TILE_DIM];
   __shared__ float gamma_buffer[TILE_DIM][TILE_DIM];
 
-  cg::thread_block b = cg::this_thread_block();
-  cg::thread_block_tile<TILE_DIM> g = cg::tiled_partition<TILE_DIM>(b);
+  int bx = blockIdx.x;
+  int tx = threadIdx.x; // 0..TILE_DIM-1 -> column within tile
+  int ty = threadIdx.y; // 0..TILE_DIM-1 -> "row chunk" within tile
 
-  // Step 1
+  // global column index this thread's tx corresponds to
+  int col = bx * blockDim.x + tx;
+  int stride_cols = gridDim.x * blockDim.x; // not used for loop here, but kept if needed
 
-  // Step 2
-  
-  // Step 3
-  
-  // Step 4
+  // If column is outside width we still must avoid writing to shared buffer indices for safety.
+  // We'll accumulate zero and store zero into the shared buffer for those tx.
+  double dbetta_partial = 0.0;
+  double dgamma_partial = 0.0;
 
-  assert(false && "Not Implemented");
-  /// END ASSIGN4_2_2
+  // Each thread processes rows starting at ty, stepping by blockDim.y
+  for (int row = ty; row < rows; row += blockDim.y) {
+    if (col < width) {
+      int idx = row * width + col; // index into [rows, width]
+      float dout = out_grad[idx];
+      float xhat;
+      if (means != nullptr) {
+        float mean = means[row];
+        // match baseline semantics: use rsqrt(var) (no extra epsilon here)
+        float rsqrt_var = 1.0f / sqrtf(vars[row]);
+        xhat = (inp[idx] - mean) * rsqrt_var;
+      } else {
+        // inp is post-layernorm output in this branch
+        xhat = (inp[idx] - betta[col]) / gamma[col];
+      }
+      dbetta_partial += (double)dout;
+      dgamma_partial += (double)(xhat * dout);
+    }
+  }
+
+  // store partials into shared memory (convert to float)
+  // use indices [ty][tx] so later the ty==0 row threads can sum down
+  betta_buffer[ty][tx] = static_cast<float>(dbetta_partial);
+  gamma_buffer[ty][tx] = static_cast<float>(dgamma_partial);
+
+  __syncthreads();
+
+  // Now threads with ty == 0 will sum over the ty dimension for their tx
+  // and write the final per-column results.
+  if (ty == 0) {
+    float dbetta_sum = 0.f;
+    float dgamma_sum = 0.f;
+    // sum over all ty rows actually used (blockDim.y may be > rows, but unused entries will be 0)
+    int y_limit = blockDim.y;
+    for (int i = 0; i < y_limit; ++i) {
+      dbetta_sum += betta_buffer[i][tx];
+      dgamma_sum += gamma_buffer[i][tx];
+    }
+
+    // compute the global column index again
+    int out_col = bx * blockDim.x + tx;
+    if (out_col < width) {
+      // unique writer per (block,tx) combination -> direct store
+      betta_grad[out_col] = dbetta_sum;
+      gamma_grad[out_col] = dgamma_sum;
+    }
+  }
+
+  // done
 }
+
+
 
 /**
 @brief: ker_ln_bw_dinp
@@ -272,26 +353,87 @@ template <typename T>
 __global__ void ker_ln_bw_dinp(T *inp_grad, const T *out_grad, const T *inp,
                                const T *gamma, const T *betta, const T *vars,
                                const T *means, int hidden_dim) {
-  
-  /// BEGIN ASSIGN4_2_2
-  /// TODO
-  // Hints:
-  // 1. Compute dxhat=dy*w with reinterpret_cast by casting to float4 for speedup
-  // 2. Compute xhat with reinterpret_cast by casting to float4 for speedup
-  // 3. Compute reduce sum for dxhat and dxhat*xhat with blockReduce
-  // 4. Compute final gradient
-  
-  // Step 1
- 
+
+  int batch_seq_idx = blockIdx.x;
+  int tid = threadIdx.x;
+  if (tid >= hidden_dim) return;
+
+  // reinterpret_cast base pointers and offset in float4 units
+  const float4 *out_grad_vec = reinterpret_cast<const float4*>(out_grad) + batch_seq_idx * hidden_dim;
+  const float4 *inp_vec = reinterpret_cast<const float4*>(inp) + batch_seq_idx * hidden_dim;
+  const float4 *gamma_vec = reinterpret_cast<const float4*>(gamma);
+  const float4 *betta_vec = reinterpret_cast<const float4*>(betta);
+
+  // Step 1: dxhat = dy * gamma
+  float4 dy = out_grad_vec[tid];
+  float4 w = gamma_vec[tid];
+  float4 dxhat_vec;
+  dxhat_vec.x = dy.x * w.x;
+  dxhat_vec.y = dy.y * w.y;
+  dxhat_vec.z = dy.z * w.z;
+  dxhat_vec.w = dy.w * w.w;
+
   // Step 2
-   
-  // Step 3
- 
-  // Step 4
+  float4 xhat_vec;
   
-  assert(false && "Not Implemented");
-  /// END ASSIGN4_2_2
+  float rsqrt_var = 1.0f / sqrtf(vars[batch_seq_idx]);
+  if (means != nullptr) {
+    float mean = means[batch_seq_idx];
+    float4 x = inp_vec[tid];
+    xhat_vec.x = (x.x - mean) * rsqrt_var;
+    xhat_vec.y = (x.y - mean) * rsqrt_var;
+    xhat_vec.z = (x.z - mean) * rsqrt_var;
+    xhat_vec.w = (x.w - mean) * rsqrt_var;
+  } else {
+    float4 out = inp_vec[tid];
+    float4 b = betta_vec[tid];
+    float4 gvec = gamma_vec[tid];
+    xhat_vec.x = (out.x - b.x) / gvec.x;
+    xhat_vec.y = (out.y - b.y) / gvec.y;
+    xhat_vec.z = (out.z - b.z) / gvec.z;
+    xhat_vec.w = (out.w - b.w) / gvec.w;
+  }
+
+  // Step 3
+  const int token_per_reduce = 1;
+  
+  double sum_dxhat_d = (double)dxhat_vec.x + (double)dxhat_vec.y + (double)dxhat_vec.z + (double)dxhat_vec.w;
+  double sum_dxhat_xhat_d = (double)(dxhat_vec.x * xhat_vec.x) +
+                            (double)(dxhat_vec.y * xhat_vec.y) +
+                            (double)(dxhat_vec.z * xhat_vec.z) +
+                            (double)(dxhat_vec.w * xhat_vec.w);
+
+  float sum_dxhat_arr[token_per_reduce];
+  float sum_dxhat_xhat_arr[token_per_reduce];
+  sum_dxhat_arr[0] = static_cast<float>(sum_dxhat_d);
+  sum_dxhat_xhat_arr[0] = static_cast<float>(sum_dxhat_xhat_d);
+
+  blockReduce<ReduceType::kSum, token_per_reduce>(sum_dxhat_arr);
+  blockReduce<ReduceType::kSum, token_per_reduce>(sum_dxhat_xhat_arr);
+
+  __shared__ float s_sum_dxhat;
+  __shared__ float s_sum_dxhat_xhat;
+  if (threadIdx.x == 0) {
+    s_sum_dxhat = sum_dxhat_arr[0];
+    s_sum_dxhat_xhat = sum_dxhat_xhat_arr[0];
+  }
+  __syncthreads();
+
+  // Step 4
+  float original_hidden_dim = hidden_dim * 4.0f;
+  float mean_dxhat = s_sum_dxhat / original_hidden_dim;
+  float mean_dxhat_xhat = s_sum_dxhat_xhat / original_hidden_dim;
+
+  float4 dinp_vec;
+  dinp_vec.x = (dxhat_vec.x - (mean_dxhat + xhat_vec.x * mean_dxhat_xhat)) * rsqrt_var;
+  dinp_vec.y = (dxhat_vec.y - (mean_dxhat + xhat_vec.y * mean_dxhat_xhat)) * rsqrt_var;
+  dinp_vec.z = (dxhat_vec.z - (mean_dxhat + xhat_vec.z * mean_dxhat_xhat)) * rsqrt_var;
+  dinp_vec.w = (dxhat_vec.w - (mean_dxhat + xhat_vec.w * mean_dxhat_xhat)) * rsqrt_var;
+
+  float4 *inp_grad_vec = reinterpret_cast<float4*>(inp_grad) + batch_seq_idx * hidden_dim;
+  inp_grad_vec[tid] = dinp_vec;
 }
+
 extern "C" {
 void launch_layernorm_bw(float *gamma_grad, float *betta_grad, float *inp_grad,
                          const float *out_grad, const float *inp, const float *gamma,
@@ -314,6 +456,10 @@ void launch_layernorm_bw(float *gamma_grad, float *betta_grad, float *inp_grad,
   cudaMalloc((void **)&d_betta, gamma_betta_size);
   cudaMalloc((void **)&d_vars, vars_means_size);
   cudaMalloc((void **)&d_means, vars_means_size);
+  
+  cudaMemset(d_gamma_grad, 0, gamma_betta_size);
+  cudaMemset(d_betta_grad, 0, gamma_betta_size);
+  cudaMemset(d_inp_grad, 0, grad_output_size);
 
   // Copy memory to device
   cudaMemcpy((void *)d_out_grad, out_grad, grad_output_size, cudaMemcpyHostToDevice);
@@ -327,7 +473,7 @@ void launch_layernorm_bw(float *gamma_grad, float *betta_grad, float *inp_grad,
   // Compute grad of gamma and betta
   // This calculates the number of blocks needed to cover the data along the specified dimension, rounds it up.
   // The result is then multiplied by TILE_DIM to ensure that the grid size is a multiple of TILE_DIM.
-  dim3 grid_dim(((hidden_dim + TILE_DIM - 1) / TILE_DIM) * TILE_DIM);
+  dim3 grid_dim((hidden_dim + TILE_DIM - 1) / TILE_DIM);
   dim3 block_dim(TILE_DIM, TILE_DIM);
   ker_ln_bw_dgamma_dbetta<float><<<grid_dim, block_dim, 0, stream_1>>>(
       d_gamma_grad, d_betta_grad, d_out_grad, d_inp, d_gamma, d_betta, d_vars,
