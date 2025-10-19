@@ -172,6 +172,7 @@ void launch_layernorm(float *ln_res, float *vars, float *means,
 }
 }
 
+
 /**
 @brief: ker_ln_bw_dgamma_dbetta
 Layer norm backword kernel, compute the gradient of gamma and betta.
@@ -202,71 +203,39 @@ means: [batch_size * seq_len], mean of ln forward,
 (gamma && betta) ^ (vars && means) should be true
 */
 template <typename T>
-__global__ void working_ker_ln_bw_dgamma_dbetta(T *gamma_grad, T *betta_grad,
-                                        const T *out_grad,
-                                        const T *inp, const T *gamma,
-                                        const T *betta, const T *vars,
-                                        const T *means, int rows, int width) {
-  // Each thread handles columns starting at tid_x, stepping by stride.
-  int tid_x = blockIdx.x * blockDim.x + threadIdx.x;
-  int stride = gridDim.x * blockDim.x;
-
-  for (int col = tid_x; col < width; col += stride) {
-    // Use double for accumulation to avoid catastrophic FP error
-    double dbetta_sum_d = 0.0;
-    double dgamma_sum_d = 0.0;
-
-    for (int row = 0; row < rows; ++row) {
-      int idx = row * width + col;
-      float dout = out_grad[idx];
-
-      float xhat;
-      if (means != nullptr) {
-        float mean = means[row];
-        // match baseline: std = sqrt(var), so rsqrt(var) without epsilon is closer
-        float rsqrt_var = 1.0f / sqrtf(vars[row]);
-        xhat = (inp[idx] - mean) * rsqrt_var;
-      } else {
-        // if means==nullptr, inp is post-layernorm output, and betta/gamma exist
-        xhat = (inp[idx] - betta[col]) / gamma[col];
-      }
-      dbetta_sum_d += (double)dout;
-      dgamma_sum_d += (double)(xhat * dout);
-    }
-
-    // unique writer per column => direct store (no atomics). This is safe with your current
-    // grid/block launch (gridDim.x * blockDim.x >= width when using the default launch),
-    // and even if grid is undersized the mapping used above ensures uniqueness.
-    betta_grad[col] = static_cast<float>(dbetta_sum_d);
-    gamma_grad[col] = static_cast<float>(dgamma_sum_d);
-  }
-}
-
-
-template <typename T>
 __global__ void ker_ln_bw_dgamma_dbetta(T *gamma_grad, T *betta_grad,
                                         const T *out_grad,
                                         const T *inp, const T *gamma,
                                         const T *betta, const T *vars,
                                         const T *means, int rows, int width) {
 
+  /// BEGIN ASSIGN4_2_2
+  /// TODO
+  // Hints:
+  // 1. Compute the partial gradients by looping across inp rows
+  // 2. Store the partial gradients in the shared memory arrays
+  // 3. Compute the reduce sum of the shared memory arrays with g.shfl_down
+  //      -> More hints about `g.shfl_down`:
+  //      -> https://developer.nvidia.com/blog/cooperative-groups/#:~:text=Using%20thread_block_tile%3A%3Ashfl_down()%20to%20simplify%20our%20warp%2Dlevel%20reduction%20does%20benefit%20our%20code%3A%20it%20simplifies%20it%20and%20eliminates%20the%20need%20for%20shared%20memory
+  //      -> The highlighted line gives you a conceptual understanding of what the g.shfl_down is doing. Usually, the threads inside a block need to load everything to shared memory and work together to reduce the result (like what you have implemented in the hw1 for reduce function). 
+  //      -> Now g.shfl_down helps you do so without consuming any shared memory. g.shfl_down makes it more efficient.
+  // 4. Assign the final result to the correct position in the global output
+
   __shared__ float betta_buffer[TILE_DIM][TILE_DIM];
   __shared__ float gamma_buffer[TILE_DIM][TILE_DIM];
 
+  cg::thread_block b = cg::this_thread_block();
+  cg::thread_block_tile<TILE_DIM> g = cg::tiled_partition<TILE_DIM>(b);
+
+  // Step 1
   int bx = blockIdx.x;
-  int tx = threadIdx.x; // 0..TILE_DIM-1 -> column within tile
-  int ty = threadIdx.y; // 0..TILE_DIM-1 -> "row chunk" within tile
-
-  // global column index this thread's tx corresponds to
+  int tx = threadIdx.x;
+  int ty = threadIdx.y;
   int col = bx * blockDim.x + tx;
-  int stride_cols = gridDim.x * blockDim.x; // not used for loop here, but kept if needed
 
-  // If column is outside width we still must avoid writing to shared buffer indices for safety.
-  // We'll accumulate zero and store zero into the shared buffer for those tx.
-  double dbetta_partial = 0.0;
-  double dgamma_partial = 0.0;
+  float dbetta_partial = 0.0;
+  float dgamma_partial = 0.0;
 
-  // Each thread processes rows starting at ty, stepping by blockDim.y
   for (int row = ty; row < rows; row += blockDim.y) {
     if (col < width) {
       int idx = row * width + col; // index into [rows, width]
@@ -286,26 +255,23 @@ __global__ void ker_ln_bw_dgamma_dbetta(T *gamma_grad, T *betta_grad,
     }
   }
 
-  // store partials into shared memory (convert to float)
-  // use indices [ty][tx] so later the ty==0 row threads can sum down
+  // Step 2
+
   betta_buffer[ty][tx] = static_cast<float>(dbetta_partial);
   gamma_buffer[ty][tx] = static_cast<float>(dgamma_partial);
 
   __syncthreads();
-
-  // Now threads with ty == 0 will sum over the ty dimension for their tx
-  // and write the final per-column results.
+  // Step 3
+  
   if (ty == 0) {
     float dbetta_sum = 0.f;
     float dgamma_sum = 0.f;
-    // sum over all ty rows actually used (blockDim.y may be > rows, but unused entries will be 0)
     int y_limit = blockDim.y;
     for (int i = 0; i < y_limit; ++i) {
       dbetta_sum += betta_buffer[i][tx];
       dgamma_sum += gamma_buffer[i][tx];
     }
-
-    // compute the global column index again
+    // Step 4
     int out_col = bx * blockDim.x + tx;
     if (out_col < width) {
       // unique writer per (block,tx) combination -> direct store
@@ -314,7 +280,9 @@ __global__ void ker_ln_bw_dgamma_dbetta(T *gamma_grad, T *betta_grad,
     }
   }
 
-  // done
+  //assert(false && "Not Implemented");
+  /// END ASSIGN4_2_2
+
 }
 
 

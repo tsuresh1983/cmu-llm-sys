@@ -20,7 +20,7 @@ datatype = np.float32
 
 
 class MultiHeadAttention(Module):
-    def __init__(self, n_embd: int, n_head: int, causal: bool=True, p_dropout: float=0.1, bias: bool=True, backend: TensorBackend=None):
+    def __init__(self, n_embd: int, n_head: int, causal: bool=True, p_dropout: float=0.1, bias: bool=True, backend: TensorBackend=None, use_fused_kernels=True):
         super().__init__()
         """Implements Multi-Head Attention as described in "Attention Is All You Need"
 
@@ -51,6 +51,7 @@ class MultiHeadAttention(Module):
         self.v_projection: Linear = Linear(n_embd, n_embd, bias=bias, backend=backend)
         self.out_projection: Linear = Linear(n_embd, n_embd, bias=bias, backend=backend)
         self.dropout:Dropout = Dropout(p_dropout=p_dropout)
+        self.use_fused_kernels = use_fused_kernels
         ### END ASSIGN3_3
 
     def create_causal_mask(self, seq_len):
@@ -131,7 +132,10 @@ class MultiHeadAttention(Module):
         m = self.create_causal_mask(seq_len)
         if self.causal:
             nom = nom + m
-        sf_wts = softmax(nom, dim=3)
+        if self.use_fused_kernels:
+            sf_wts = nom.attn_softmax(m) 
+        else:
+            softmax(nom, dim=3)
         result = sf_wts @ v
         result = result.permute(0, 2, 1, 3)
         result = result.contiguous().view(batch_size, seq_len, self.n_embd)

@@ -150,7 +150,7 @@ class Linear(Module):
 
 
 class LayerNorm1d(Module):
-    def __init__(self, dim: int, eps: float, backend: TensorBackend):
+    def __init__(self, dim: int, eps: float, backend: TensorBackend, use_fused_kernels=True):
         super().__init__()
         """Applies Layer Normalization over a mini-batch of 1-dimensional inputs.
         
@@ -171,6 +171,7 @@ class LayerNorm1d(Module):
         b = zeros_tensor_from_numpy((dim,), backend=backend)
         b.requires_grad_(True)
         self.bias = Parameter(b)
+        self.use_fused_kernels = use_fused_kernels
         # raise NotImplementedError
         ### END ASSIGN3_2
 
@@ -186,11 +187,14 @@ class LayerNorm1d(Module):
             output - Tensor of shape (bs, dim)
         """
         batch, dim = x.shape
-        ### BEGIN ASSIGN3_2
-        mean = x.mean(dim=1).view(batch, 1)
-        var = x.var(dim=1).view(batch, 1)
-        x_normalized = (x - mean) / (var + self.eps) ** 0.5
-        ln = self.weights.value * x_normalized + self.bias.value
+        if self.use_fused_kernels:
+            ln = x.layernorm(self.weights.value, self.bias.value)
+        else:
+            ### BEGIN ASSIGN3_2
+            mean = x.mean(dim=1).view(batch, 1)
+            var = x.var(dim=1).view(batch, 1)
+            x_normalized = (x - mean) / (var + self.eps) ** 0.5
+            ln = self.weights.value * x_normalized + self.bias.value
         return ln.view(batch, dim)
         # raise NotImplementedError
         ### END ASSIGN3_2

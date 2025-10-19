@@ -163,7 +163,7 @@ class PowerScalar(Function):
         grad_a    = None
         
         # COPY FROM ASSIGN3
-        raise NotImplementedError
+        grad_a = grad_output * (scalar * (a ** (scalar - 1)))
 
         return (grad_a, 0.0)
 
@@ -186,8 +186,9 @@ class Tanh(Function):
             output : Tensor
                 Tensor containing the element-wise tanh of a.
         """
-        # COPY FROM ASSIGN3
-        raise NotImplementedError
+        out = a.f.tanh_map(a)
+        ctx.save_for_backward(out)
+        return out
     
     @staticmethod
     def backward(ctx: Context, grad_output: Tensor) -> Tensor:
@@ -205,8 +206,8 @@ class Tanh(Function):
             output : Tensor
                 gradient_for_a must be the correct element-wise gradient for tanh.
         """
-        # COPY FROM ASSIGN3
-        raise NotImplementedError
+        out = ctx.saved_values[0]
+        return grad_output * (-(out ** 2) + 1)
 
 
 class Sigmoid(Function):
