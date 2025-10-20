@@ -208,7 +208,7 @@ class FeedForward(Module):
     
 
 class TransformerLayer(Module):
-    def __init__(self, n_embd: int, n_head: int, p_dropout: float=0.1, ln_eps: float=1e-5, bias: bool=True, backend: TensorBackend=None):
+    def __init__(self, n_embd: int, n_head: int, p_dropout: float=0.1, ln_eps: float=1e-5, bias: bool=True, backend: TensorBackend=None, use_fused_kernels=True):
         super().__init__()
         """
         Initialize a transformer layer with pre-layer normalization.
@@ -229,9 +229,9 @@ class TransformerLayer(Module):
         """
         ### BEGIN ASSIGN3_3
         # raise NotImplementedError
-        self.ln_1: LayerNorm1d = LayerNorm1d(dim=n_embd, eps=ln_eps, backend=backend)
-        self.ln_2: LayerNorm1d = LayerNorm1d(dim=n_embd, eps=ln_eps, backend=backend)
-        self.attention: MultiHeadAttention = MultiHeadAttention(n_embd=n_embd, n_head=n_head, p_dropout=p_dropout, bias=bias, backend=backend)
+        self.ln_1: LayerNorm1d = LayerNorm1d(dim=n_embd, eps=ln_eps, backend=backend, use_fused_kernels=use_fused_kernels)
+        self.ln_2: LayerNorm1d = LayerNorm1d(dim=n_embd, eps=ln_eps, backend=backend, use_fused_kernels=use_fused_kernels)
+        self.attention: MultiHeadAttention = MultiHeadAttention(n_embd=n_embd, n_head=n_head, p_dropout=p_dropout, bias=bias, backend=backend, use_fused_kernels=use_fused_kernels)
         self.ff: FeedForward = FeedForward(n_embd=n_embd, p_dropout=p_dropout, bias=bias, backend=backend)
         ### END ASSIGN3_3
 
@@ -270,7 +270,8 @@ class DecoderLM(Module):
         p_dropout: float=0.1,
         ln_eps: float=1e-5, 
         bias: bool=True,
-        backend: TensorBackend=None
+        backend: TensorBackend=None,
+        use_fused_kernels=True
     ):
         super().__init__()
         """
@@ -305,15 +306,15 @@ class DecoderLM(Module):
         self.token_embeddings = Embedding(num_embeddings=n_vocab, embedding_dim=n_embd, backend=backend)
         self.position_embeddings = Embedding(num_embeddings=n_vocab, embedding_dim=n_embd, backend=backend)
         self.t_layer_1 = TransformerLayer(n_embd=n_embd, n_head=n_head, p_dropout=p_dropout,
-                                          ln_eps=ln_eps, bias=bias, backend=backend)
+                                          ln_eps=ln_eps, bias=bias, backend=backend, use_fused_kernels=use_fused_kernels)
         self.t_layer_2 = TransformerLayer(n_embd=n_embd, n_head=n_head, p_dropout=p_dropout,
-                                          ln_eps=ln_eps, bias=bias, backend=backend)
+                                          ln_eps=ln_eps, bias=bias, backend=backend, use_fused_kernels=use_fused_kernels)
         self.t_layer_3 = TransformerLayer(n_embd=n_embd, n_head=n_head, p_dropout=p_dropout,
-                                          ln_eps=ln_eps, bias=bias, backend=backend)
+                                          ln_eps=ln_eps, bias=bias, backend=backend, use_fused_kernels=use_fused_kernels)
         self.t_layer_4 = TransformerLayer(n_embd=n_embd, n_head=n_head, p_dropout=p_dropout,
-                                          ln_eps=ln_eps, bias=bias, backend=backend)
+                                          ln_eps=ln_eps, bias=bias, backend=backend, use_fused_kernels=use_fused_kernels)
         self.dropout = Dropout(p_dropout=p_dropout)
-        self.ln = LayerNorm1d(dim=n_embd, eps=ln_eps, backend=backend)
+        self.ln = LayerNorm1d(dim=n_embd, eps=ln_eps, backend=backend, use_fused_kernels=use_fused_kernels)
         self.lm_head = Linear(in_size=n_embd, out_size=n_vocab, bias=bias, backend=backend)
         ### END ASSIGN3_3
     

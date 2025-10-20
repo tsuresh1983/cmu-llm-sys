@@ -243,11 +243,9 @@ __global__ void ker_ln_bw_dgamma_dbetta(T *gamma_grad, T *betta_grad,
       float xhat;
       if (means != nullptr) {
         float mean = means[row];
-        // match baseline semantics: use rsqrt(var) (no extra epsilon here)
         float rsqrt_var = 1.0f / sqrtf(vars[row]);
         xhat = (inp[idx] - mean) * rsqrt_var;
       } else {
-        // inp is post-layernorm output in this branch
         xhat = (inp[idx] - betta[col]) / gamma[col];
       }
       dbetta_partial += (double)dout;
@@ -256,11 +254,10 @@ __global__ void ker_ln_bw_dgamma_dbetta(T *gamma_grad, T *betta_grad,
   }
 
   // Step 2
-
   betta_buffer[ty][tx] = static_cast<float>(dbetta_partial);
   gamma_buffer[ty][tx] = static_cast<float>(dgamma_partial);
 
-  __syncthreads();
+  b.sync();
   // Step 3
   
   if (ty == 0) {
