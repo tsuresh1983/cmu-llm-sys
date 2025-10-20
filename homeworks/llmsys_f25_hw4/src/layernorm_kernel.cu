@@ -271,7 +271,6 @@ __global__ void ker_ln_bw_dgamma_dbetta(T *gamma_grad, T *betta_grad,
     // Step 4
     int out_col = bx * blockDim.x + tx;
     if (out_col < width) {
-      // unique writer per (block,tx) combination -> direct store
       betta_grad[out_col] = dbetta_sum;
       gamma_grad[out_col] = dgamma_sum;
     }
@@ -323,13 +322,12 @@ __global__ void ker_ln_bw_dinp(T *inp_grad, const T *out_grad, const T *inp,
   int tid = threadIdx.x;
   if (tid >= hidden_dim) return;
 
-  // reinterpret_cast base pointers and offset in float4 units
   const float4 *out_grad_vec = reinterpret_cast<const float4*>(out_grad) + batch_seq_idx * hidden_dim;
   const float4 *inp_vec = reinterpret_cast<const float4*>(inp) + batch_seq_idx * hidden_dim;
   const float4 *gamma_vec = reinterpret_cast<const float4*>(gamma);
   const float4 *betta_vec = reinterpret_cast<const float4*>(betta);
 
-  // Step 1: dxhat = dy * gamma
+  // Step 1
   float4 dy = out_grad_vec[tid];
   float4 w = gamma_vec[tid];
   float4 dxhat_vec;
