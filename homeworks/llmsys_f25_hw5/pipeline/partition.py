@@ -57,8 +57,28 @@ def _split_module(modules: nn.Sequential) -> Tuple[List[nn.Sequential], List[tor
     current_partition = []
     current_device = None
     for name, module in modules.named_children():
+        
         # BEGIN ASSIGN5_2_1
-        raise NotImplementedError("Module Splitting Not Implemented Yet")
+        if isinstance(module, WithDevice):
+            module_device = module.device
+        else:
+            module_device = _retrieve_device(module=module)
+        if current_device == None:
+            current_device = module_device
+            current_partition.append(module)
+        elif current_device == module_device:
+            current_partition.append(module)
+        else:
+            partitions.append(_assemble_partition(current_partition))
+            devices.append(current_device)
+            current_device = module_device
+            current_partition = []
+            current_partition.append(module)
+            
+        current_partition.append(module)
+        devices.append(current_device)
+        print(f"Name: {name}, Device: {current_device}")
+        # raise NotImplementedError("Module Splitting Not Implemented Yet")
         # END ASSIGN5_2_1
 
     if current_device is not None:
@@ -68,3 +88,17 @@ def _split_module(modules: nn.Sequential) -> Tuple[List[nn.Sequential], List[tor
     partitions = nn.ModuleList(partitions)
 
     return partitions, devices
+
+
+if __name__ == "__main__":
+    model = nn.Sequential(
+          nn.Conv2d(10,20,5).to('cuda:0'),
+          nn.Conv2d(20,64,5).to('cuda:0'),
+          nn.Conv2d(64,128,5).to('cuda:0'),
+    )
+    partitions, devices = _split_module(model)
+    assert len(partitions) == 2
+    assert len(devices) == 2
+    assert len(partitions[0]) == 2
+    assert next(partitions[0].parameters()).device == devices[0]
+    assert next(partitions[1].parameters()).device == devices[1]

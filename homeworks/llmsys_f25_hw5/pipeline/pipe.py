@@ -26,7 +26,17 @@ def _clock_cycles(num_batches: int, num_partitions: int) -> Iterable[List[Tuple[
     This function should yield schedules for each clock cycle.
     '''
     # BEGIN ASSIGN5_2_1
-    raise NotImplementedError("Schedule Generation Not Implemented Yet")
+    num_clocks = num_batches + num_partitions - 1
+
+    for k in range(num_clocks):
+        schedule = []
+        for i in range(num_batches):
+            j = k - i
+            if 0 <= j < num_partitions:
+                schedule.append((i, j))
+        yield schedule
+        
+    # raise NotImplementedError("Schedule Generation Not Implemented Yet")
     # END ASSIGN5_2_1
 
 class Pipe(nn.Module):
@@ -53,7 +63,16 @@ class Pipe(nn.Module):
         Please note that you should put the result on the last device. Putting the result on the same device as input x will lead to pipeline parallel training failing.
         '''
         # BEGIN ASSIGN5_2_2
-        raise NotImplementedError("Pipeline Parallel Not Implemented Yet")
+        batches = list(x.split(self.split_size, dim=0))
+        num_batches = len(batches)
+        num_partitions = len(self.partitions)
+        
+        for schedule in _clock_cycles(num_batches, num_partitions):
+          self.compute(batches, schedule)
+          
+        result = torch.cat(batches, dim=0)
+        return result
+        # raise NotImplementedError("Pipeline Parallel Not Implemented Yet")
         # END ASSIGN5_2_2
 
     def compute(self, batches, schedule: List[Tuple[int, int]]) -> None:
@@ -69,6 +88,23 @@ class Pipe(nn.Module):
         devices = self.devices
 
         # BEGIN ASSIGN5_2_2
-        raise NotImplementedError("Pipeline Parallel Not Implemented Yet")
+        
+        for i, j in schedule:
+            batch = batches[i]
+            partition = partitions[j]
+            device = devices[j]
+            batch = batch.to(device)
+            task = Task(partition(batch))
+            self.in_queues[j].put(task)
+            
+        for i, j in schedule:
+          success, result = self.out_queues[j].get()
+          if not success:
+              exc_info = result
+              raise Exception(str(exc_info))
+
+          task, batch = result
+          batches[i] = batch
+        # raise NotImplementedError("Pipeline Parallel Not Implemented Yet")
         # END ASSIGN5_2_2
 
