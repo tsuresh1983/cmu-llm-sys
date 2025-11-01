@@ -5,7 +5,7 @@ from torch import Tensor, nn
 import torch.autograd
 import torch.cuda
 from .worker import Task, create_workers
-from .partition import _split_module
+from .partition import _split_module, WithDevice
 
 def _clock_cycles(num_batches: int, num_partitions: int) -> Iterable[List[Tuple[int, int]]]:
     '''Generate schedules for each clock cycle.
@@ -63,13 +63,17 @@ class Pipe(nn.Module):
         Please note that you should put the result on the last device. Putting the result on the same device as input x will lead to pipeline parallel training failing.
         '''
         # BEGIN ASSIGN5_2_2
+
         batches = list(x.split(self.split_size, dim=0))
+
         num_batches = len(batches)
         num_partitions = len(self.partitions)
         
         for schedule in _clock_cycles(num_batches, num_partitions):
           self.compute(batches, schedule)
-          
+
+        # for i, batch in enumerate(batches):
+        #     batch.to(self.devices[-1])
         result = torch.cat(batches, dim=0)
         return result
         # raise NotImplementedError("Pipeline Parallel Not Implemented Yet")
@@ -94,17 +98,41 @@ class Pipe(nn.Module):
             partition = partitions[j]
             device = devices[j]
             batch = batch.to(device)
-            task = Task(partition(batch))
+            from pipeline.partition import _retrieve_device
+            if batch.device != _retrieve_device(partition):
+                raise Exception("Batch and module are not on same device")
+            task = Task(lambda b=batch, p=partition: p(b))
             self.in_queues[j].put(task)
             
         for i, j in schedule:
           success, result = self.out_queues[j].get()
           if not success:
               exc_info = result
-              raise Exception(str(exc_info))
+              raise Exception(j, str(exc_info))
 
           task, batch = result
+        #   batch.to(self.devices[-1])
           batches[i] = batch
+          
         # raise NotImplementedError("Pipeline Parallel Not Implemented Yet")
         # END ASSIGN5_2_2
 
+if __name__ == "__main__":
+    batch_size = 16
+    split_size = 2
+    model = nn.Sequential(
+        nn.Linear(3, 4).to('cuda:0'),
+        WithDevice(nn.Sigmoid(), 'cuda:0'),
+        nn.Linear(4, 5).to('cuda:0'),
+        WithDevice(nn.Sigmoid(), 'cuda:0'),
+    )
+    
+    x = torch.randn(batch_size, 3).to('cuda:0')
+    y0 = model(x).to('cpu')
+
+    # move the last two layer to another device
+    model[-2] = model[-2].to('cuda:1')
+    model[-1] = WithDevice(nn.Sigmoid(), 'cuda:1')
+    pipe = Pipe(model, split_size=split_size)
+    y1 = pipe(x).to('cpu')
+    assert torch.allclose(y0, y1)

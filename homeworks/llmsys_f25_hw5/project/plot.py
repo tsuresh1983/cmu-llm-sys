@@ -32,9 +32,16 @@ if __name__ == '__main__':
         ['Data Parallel - 2GPUs', 'Single GPU'],
         'ddp_vs_rn_tps.png', title="GPT2 Tokens per Second [H100]")
 
-    # pp_mean, pp_std = None, None
-    # mp_mean, mp_std = None, None
-    # plot([pp_mean, mp_mean],
-    #     [pp_std, mp_std],
-    #     ['Pipeline Parallel', 'Model Parallel'],
-    #     'pp_vs_mp.png')
+    pp_mean, pp_std = 41.888131499290466, 0.997773289680481
+    mp_mean, mp_std = 36.94660031795502, 0.2459026575088501
+    plot([pp_mean, mp_mean],
+        [pp_std, mp_std],
+        ['Pipeline Parallel', 'Model Parallel'],
+        'pp_vs_mp.png', title="GPT2 Execution Time(seconds) [A100]")
+    
+    pp_mean, pp_std = 15287.464799959647, 364.1466806555618
+    mp_mean, mp_std = 17323.064802567333, 115.29579540446139
+    plot([pp_mean, mp_mean],
+        [pp_std, mp_std],
+        ['Pipeline Parallel', 'Model Parallel'],
+        'pp_vs_mp_tps.png', title="GPT2 tokens per seconds [A100]")

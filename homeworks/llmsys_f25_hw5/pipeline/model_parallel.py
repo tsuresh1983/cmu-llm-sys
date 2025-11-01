@@ -12,7 +12,7 @@ from transformers.modeling_outputs import (
 from transformers import AutoConfig, GPT2Model, GPT2PreTrainedModel
 
 from .pipe import Pipe
-from .partition import WithDevice, _retrieve_device
+from .partition import WithDevice, _retrieve_device, _split_module
 from .model import GPT2ModelCustom, GPT2LMHeadModelCustom
 
 class ExtractFirstItem(nn.Module):
@@ -40,8 +40,23 @@ class GPT2ModelParallel(GPT2ModelCustom):
         '''
 
         # BEGIN ASSIGN5_2_3
-        pipe = None
-        raise NotImplementedError("Pipeline Parallel Not Implemented Yet")
+        self.pipeline_parallel = True
+        
+        class GPT2BlockWrapper(nn.Module):
+            def __init__(self, block):
+                super().__init__()
+                self.block = block
+
+            def forward(self, x):
+                output = self.block(x)
+                if isinstance(output, tuple):
+                    return output[0]
+                return output
+        wrapped_blocks = [GPT2BlockWrapper(block) for block in self.h]
+        layers = nn.Sequential(*wrapped_blocks)
+        pipe = Pipe(layers, split_size=split_size)
+
+        # raise NotImplementedError("Pipeline Parallel Not Implemented Yet")
         # END ASSIGN5_2_3
         self.h_pp = pipe
 
