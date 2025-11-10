@@ -13,3 +13,5 @@
 
 
 [Making Deep Learning Go Brrrr From First Principles](https://horace.io/brrr_intro.html)
+
+[Deepseek v3 code](https://github.com/deepseek-ai/DeepSeek-V3/blob/main/inference/model.py)
