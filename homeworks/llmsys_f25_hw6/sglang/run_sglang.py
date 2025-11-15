@@ -4,6 +4,7 @@ import asyncio
 import json
 import argparse
 
+
 def main():
     parser = argparse.ArgumentParser(description="Run inference with a specific model path.")
     parser.add_argument(
@@ -24,12 +25,19 @@ def main():
     # TODO: initialize sglang egnine here
     # you may want to explore different args we can pass here to make the inference faster
     # e.g. dp_size, mem_fraction_static
+    
+    
+    # TESTED ON 2 x H100 and forced mem_fraction_static to 0.2 to make sure it works on low memory of 16GB
+
     llm = sgl.Engine(
           model_path=model_path,
-          tp_size=2,
-          mem_fraction_static=0.85,
+          tp_size=1,
+          dp_size=2,
+          mem_fraction_static=0.2,
           attention_backend="dual_chunk_flash_attn",
-          trust_remote_code=True
+          context_length=16384,
+          trust_remote_code=True,
+          disable_cuda_graph=True
       )
 
     prompts = []
@@ -42,7 +50,8 @@ def main():
     outputs = []
 
     # TODO: you may want to explore different batch_size
-    batch_size = len(prompts) 
+    ### FOR 2x H100
+    batch_size = 16
 
     from tqdm import tqdm
     for i in tqdm(range(0, len(prompts), batch_size)):

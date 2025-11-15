@@ -28,6 +28,8 @@ from dschat.utils.module.lora import convert_linear_layer_to_lora, convert_lora_
 from dschat.utils.model.model_utils import create_hf_model, causal_lm_model_to_fp32_loss
 from dschat.utils.perf import print_throughput
 
+# For H100 to simulate V100
+torch.cuda.set_per_process_memory_fraction(0.2)  # 0.2 * 80GB = 16GB
 
 def parse_args():
     parser = argparse.ArgumentParser(
