@@ -1,0 +1,226 @@
+[2025-11-23 21:42:18,076] [WARNING] [runner.py:232:fetch_hostfile] Unable to find hostfile, will proceed with training with local resources only.
+[2025-11-23 21:42:18,076] [INFO] [runner.py:630:main] cmd = /home/ubuntu/miniforge3/envs/ds/bin/python3.9 -u -m deepspeed.launcher.launch --world_info=eyJsb2NhbGhvc3QiOiBbMCwgMV19 --master_addr=127.0.0.1 --master_port=29500 --enable_each_rank_log=None --log_level=info main.py --data_split 2,4,4 --model_name_or_path meta-llama/Llama-2-7b-hf --per_device_train_batch_size 4 --per_device_eval_batch_size 8 --max_seq_len 512 --learning_rate 9.65e-6 --weight_decay 0. --num_train_epochs 2 --gradient_accumulation_steps 8 --lr_scheduler_type cosine --num_warmup_steps 0 --seed 1234 --gradient_checkpointing --dtype bf16 --zero_stage 3 --deepspeed --offload --lora_dim 8 --output_dir ./output_llama2_7b_lora
+[2025-11-23 21:42:24,527] [INFO] [launch.py:162:main] WORLD INFO DICT: {'localhost': [0, 1]}
+[2025-11-23 21:42:24,527] [INFO] [launch.py:168:main] nnodes=1, num_local_procs=2, node_rank=0
+[2025-11-23 21:42:24,527] [INFO] [launch.py:179:main] global_rank_mapping=defaultdict(<class 'list'>, {'localhost': [0, 1]})
+[2025-11-23 21:42:24,527] [INFO] [launch.py:180:main] dist_world_size=2
+[2025-11-23 21:42:24,527] [INFO] [launch.py:184:main] Setting CUDA_VISIBLE_DEVICES=0,1
+[2025-11-23 21:42:24,559] [INFO] [launch.py:272:main] process 96893 spawned with command: ['/home/ubuntu/miniforge3/envs/ds/bin/python3.9', '-u', 'main.py', '--local_rank=0', '--data_split', '2,4,4', '--model_name_or_path', 'meta-llama/Llama-2-7b-hf', '--per_device_train_batch_size', '4', '--per_device_eval_batch_size', '8', '--max_seq_len', '512', '--learning_rate', '9.65e-6', '--weight_decay', '0.', '--num_train_epochs', '2', '--gradient_accumulation_steps', '8', '--lr_scheduler_type', 'cosine', '--num_warmup_steps', '0', '--seed', '1234', '--gradient_checkpointing', '--dtype', 'bf16', '--zero_stage', '3', '--deepspeed', '--offload', '--lora_dim', '8', '--output_dir', './output_llama2_7b_lora']
+[2025-11-23 21:42:24,596] [INFO] [launch.py:272:main] process 96894 spawned with command: ['/home/ubuntu/miniforge3/envs/ds/bin/python3.9', '-u', 'main.py', '--local_rank=1', '--data_split', '2,4,4', '--model_name_or_path', 'meta-llama/Llama-2-7b-hf', '--per_device_train_batch_size', '4', '--per_device_eval_batch_size', '8', '--max_seq_len', '512', '--learning_rate', '9.65e-6', '--weight_decay', '0.', '--num_train_epochs', '2', '--gradient_accumulation_steps', '8', '--lr_scheduler_type', 'cosine', '--num_warmup_steps', '0', '--seed', '1234', '--gradient_checkpointing', '--dtype', 'bf16', '--zero_stage', '3', '--deepspeed', '--offload', '--lora_dim', '8', '--output_dir', './output_llama2_7b_lora']
+GPU Memory: 39.5GB, Setting fraction: 0.41 (16.0GB limit)
+GPU Memory: 39.5GB, Setting fraction: 0.41 (16.0GB limit)
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|█████     | 1/2 [00:07<00:07,  7.71s/it]Loading checkpoint shards:  50%|█████     | 1/2 [00:08<00:08,  8.16s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:10<00:00,  4.91s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:10<00:00,  5.33s/it]
+Loading checkpoint shards: 100%|██████████| 2/2 [00:10<00:00,  4.92s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:10<00:00,  5.41s/it]
+The new embeddings will be initialized from a multivariate normal distribution that has old embeddings' mean and covariance. As described in this article: https://nlp.stanford.edu/~johnhew/vocab-expansion.html. To disable this, use `mean_resizing=False`
+The new embeddings will be initialized from a multivariate normal distribution that has old embeddings' mean and covariance. As described in this article: https://nlp.stanford.edu/~johnhew/vocab-expansion.html. To disable this, use `mean_resizing=False`
+The new lm_head weights will be initialized from a multivariate normal distribution that has old embeddings' mean and covariance. As described in this article: https://nlp.stanford.edu/~johnhew/vocab-expansion.html. To disable this, use `mean_resizing=False`
+The new lm_head weights will be initialized from a multivariate normal distribution that has old embeddings' mean and covariance. As described in this article: https://nlp.stanford.edu/~johnhew/vocab-expansion.html. To disable this, use `mean_resizing=False`
+Creating prompt dataset ['Dahoas/rm-static'], reload=True
+Creating dataset Dahoas_rm_static for train_phase=1 size=762
+Creating dataset Dahoas_rm_static for train_phase=1 size=51
+[rank1]:W1123 21:42:59.725742 96894 site-packages/torch/utils/cpp_extension.py:2425] TORCH_CUDA_ARCH_LIST is not set, all archs for visible cards are included for compilation. 
+[rank1]:W1123 21:42:59.725742 96894 site-packages/torch/utils/cpp_extension.py:2425] If this is not desired, please set os.environ['TORCH_CUDA_ARCH_LIST'] to specific architectures.
+Parameter Offload - Persistent parameters statistics: param_count = 65, numel = 266240
+***** Running training *****
+***** Evaluating perplexity, Epoch 0/2 *****
+ppl: 6.18466329574585, loss: 1.8220725059509277
+Beginning of Epoch 1/2, Total Micro Batches 96
+Model Parameters: 6.607 B, Latency: 6.58s, TFLOPs: 6.25, Samples/sec: 0.61, Time/seq 1.64s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 6.65s, TFLOPs: 6.17, Samples/sec: 0.60, Time/seq 1.66s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 5.15s, TFLOPs: 7.98, Samples/sec: 0.78, Time/seq 1.29s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.42s, TFLOPs: 9.29, Samples/sec: 0.90, Time/seq 1.11s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.10s, TFLOPs: 10.02, Samples/sec: 0.98, Time/seq 1.02s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.15s, TFLOPs: 9.90, Samples/sec: 0.96, Time/seq 1.04s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.25s, TFLOPs: 9.65, Samples/sec: 0.94, Time/seq 1.06s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 17.76s, TFLOPs: 2.31, Samples/sec: 0.23, Time/seq 4.44s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.49s, TFLOPs: 9.14, Samples/sec: 0.89, Time/seq 1.12s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.23s, TFLOPs: 9.72, Samples/sec: 0.95, Time/seq 1.06s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.18s, TFLOPs: 9.82, Samples/sec: 0.96, Time/seq 1.05s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.10s, TFLOPs: 10.02, Samples/sec: 0.98, Time/seq 1.02s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.17s, TFLOPs: 9.85, Samples/sec: 0.96, Time/seq 1.04s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.19s, TFLOPs: 9.81, Samples/sec: 0.96, Time/seq 1.05s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.17s, TFLOPs: 9.85, Samples/sec: 0.96, Time/seq 1.04s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 12.56s, TFLOPs: 3.27, Samples/sec: 0.32, Time/seq 3.14s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 6.92s, TFLOPs: 5.93, Samples/sec: 0.58, Time/seq 1.73s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 6.00s, TFLOPs: 6.85, Samples/sec: 0.67, Time/seq 1.50s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.65s, TFLOPs: 8.83, Samples/sec: 0.86, Time/seq 1.16s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.50s, TFLOPs: 9.12, Samples/sec: 0.89, Time/seq 1.13s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.69s, TFLOPs: 8.76, Samples/sec: 0.85, Time/seq 1.17s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.57s, TFLOPs: 9.00, Samples/sec: 0.88, Time/seq 1.14s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.84s, TFLOPs: 8.49, Samples/sec: 0.83, Time/seq 1.21s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 18.29s, TFLOPs: 2.25, Samples/sec: 0.22, Time/seq 4.57s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.96s, TFLOPs: 8.27, Samples/sec: 0.81, Time/seq 1.24s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.49s, TFLOPs: 9.14, Samples/sec: 0.89, Time/seq 1.12s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.52s, TFLOPs: 9.09, Samples/sec: 0.89, Time/seq 1.13s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.65s, TFLOPs: 8.82, Samples/sec: 0.86, Time/seq 1.16s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.82s, TFLOPs: 8.53, Samples/sec: 0.83, Time/seq 1.20s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.68s, TFLOPs: 8.77, Samples/sec: 0.85, Time/seq 1.17s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.94s, TFLOPs: 8.32, Samples/sec: 0.81, Time/seq 1.23s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 16.50s, TFLOPs: 2.49, Samples/sec: 0.24, Time/seq 4.12s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 5.12s, TFLOPs: 8.02, Samples/sec: 0.78, Time/seq 1.28s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.54s, TFLOPs: 9.04, Samples/sec: 0.88, Time/seq 1.14s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.65s, TFLOPs: 8.83, Samples/sec: 0.86, Time/seq 1.16s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.94s, TFLOPs: 8.31, Samples/sec: 0.81, Time/seq 1.24s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.90s, TFLOPs: 8.38, Samples/sec: 0.82, Time/seq 1.23s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.62s, TFLOPs: 8.90, Samples/sec: 0.87, Time/seq 1.15s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.61s, TFLOPs: 8.90, Samples/sec: 0.87, Time/seq 1.15s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 14.27s, TFLOPs: 2.88, Samples/sec: 0.28, Time/seq 3.57s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.86s, TFLOPs: 8.45, Samples/sec: 0.82, Time/seq 1.21s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.99s, TFLOPs: 8.23, Samples/sec: 0.80, Time/seq 1.25s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 5.07s, TFLOPs: 8.10, Samples/sec: 0.79, Time/seq 1.27s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.99s, TFLOPs: 8.23, Samples/sec: 0.80, Time/seq 1.25s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.65s, TFLOPs: 8.83, Samples/sec: 0.86, Time/seq 1.16s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.50s, TFLOPs: 9.13, Samples/sec: 0.89, Time/seq 1.12s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.75s, TFLOPs: 8.64, Samples/sec: 0.84, Time/seq 1.19s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 15.53s, TFLOPs: 2.64, Samples/sec: 0.26, Time/seq 3.88s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 5.27s, TFLOPs: 7.79, Samples/sec: 0.76, Time/seq 1.32s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.74s, TFLOPs: 8.66, Samples/sec: 0.84, Time/seq 1.19s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.88s, TFLOPs: 8.42, Samples/sec: 0.82, Time/seq 1.22s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.91s, TFLOPs: 8.36, Samples/sec: 0.81, Time/seq 1.23s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.77s, TFLOPs: 8.60, Samples/sec: 0.84, Time/seq 1.19s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.79s, TFLOPs: 8.58, Samples/sec: 0.84, Time/seq 1.20s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.83s, TFLOPs: 8.50, Samples/sec: 0.83, Time/seq 1.21s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 13.08s, TFLOPs: 3.14, Samples/sec: 0.31, Time/seq 3.27s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.86s, TFLOPs: 8.46, Samples/sec: 0.82, Time/seq 1.21s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.95s, TFLOPs: 8.29, Samples/sec: 0.81, Time/seq 1.24s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.69s, TFLOPs: 8.75, Samples/sec: 0.85, Time/seq 1.17s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.75s, TFLOPs: 8.64, Samples/sec: 0.84, Time/seq 1.19s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.82s, TFLOPs: 8.53, Samples/sec: 0.83, Time/seq 1.20s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.98s, TFLOPs: 8.25, Samples/sec: 0.80, Time/seq 1.24s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.70s, TFLOPs: 8.73, Samples/sec: 0.85, Time/seq 1.18s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 12.91s, TFLOPs: 3.18, Samples/sec: 0.31, Time/seq 3.23s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 5.12s, TFLOPs: 8.01, Samples/sec: 0.78, Time/seq 1.28s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.67s, TFLOPs: 8.79, Samples/sec: 0.86, Time/seq 1.17s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.68s, TFLOPs: 8.77, Samples/sec: 0.85, Time/seq 1.17s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.70s, TFLOPs: 8.74, Samples/sec: 0.85, Time/seq 1.18s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.66s, TFLOPs: 8.82, Samples/sec: 0.86, Time/seq 1.16s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 5.04s, TFLOPs: 8.14, Samples/sec: 0.79, Time/seq 1.26s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.73s, TFLOPs: 8.68, Samples/sec: 0.85, Time/seq 1.18s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 13.84s, TFLOPs: 2.97, Samples/sec: 0.29, Time/seq 3.46s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 5.06s, TFLOPs: 8.11, Samples/sec: 0.79, Time/seq 1.27s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.61s, TFLOPs: 8.92, Samples/sec: 0.87, Time/seq 1.15s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.66s, TFLOPs: 8.81, Samples/sec: 0.86, Time/seq 1.16s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.66s, TFLOPs: 8.81, Samples/sec: 0.86, Time/seq 1.17s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.93s, TFLOPs: 8.32, Samples/sec: 0.81, Time/seq 1.23s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.89s, TFLOPs: 8.39, Samples/sec: 0.82, Time/seq 1.22s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.78s, TFLOPs: 8.59, Samples/sec: 0.84, Time/seq 1.20s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 14.60s, TFLOPs: 2.81, Samples/sec: 0.27, Time/seq 3.65s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 5.20s, TFLOPs: 7.90, Samples/sec: 0.77, Time/seq 1.30s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.75s, TFLOPs: 8.64, Samples/sec: 0.84, Time/seq 1.19s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.81s, TFLOPs: 8.53, Samples/sec: 0.83, Time/seq 1.20s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.77s, TFLOPs: 8.60, Samples/sec: 0.84, Time/seq 1.19s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.69s, TFLOPs: 8.76, Samples/sec: 0.85, Time/seq 1.17s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.60s, TFLOPs: 8.93, Samples/sec: 0.87, Time/seq 1.15s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.68s, TFLOPs: 8.77, Samples/sec: 0.85, Time/seq 1.17s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 12.89s, TFLOPs: 3.19, Samples/sec: 0.31, Time/seq 3.22s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.90s, TFLOPs: 8.39, Samples/sec: 0.82, Time/seq 1.22s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.94s, TFLOPs: 8.32, Samples/sec: 0.81, Time/seq 1.23s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.73s, TFLOPs: 8.69, Samples/sec: 0.85, Time/seq 1.18s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.55s, TFLOPs: 9.02, Samples/sec: 0.88, Time/seq 1.14s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.80s, TFLOPs: 8.55, Samples/sec: 0.83, Time/seq 1.20s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.81s, TFLOPs: 8.54, Samples/sec: 0.83, Time/seq 1.20s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.67s, TFLOPs: 8.79, Samples/sec: 0.86, Time/seq 1.17s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 14.22s, TFLOPs: 2.89, Samples/sec: 0.28, Time/seq 3.56s, Batch Size: 4, Sequence Length: 512
+***** Evaluating perplexity, Epoch 1/2 *****
+ppl: 4.411715984344482, loss: 1.4842636585235596
+Beginning of Epoch 2/2, Total Micro Batches 96
+Model Parameters: 6.607 B, Latency: 4.90s, TFLOPs: 8.38, Samples/sec: 0.82, Time/seq 1.23s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.68s, TFLOPs: 8.77, Samples/sec: 0.85, Time/seq 1.17s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.68s, TFLOPs: 8.78, Samples/sec: 0.86, Time/seq 1.17s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.49s, TFLOPs: 9.15, Samples/sec: 0.89, Time/seq 1.12s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.69s, TFLOPs: 8.77, Samples/sec: 0.85, Time/seq 1.17s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.80s, TFLOPs: 8.56, Samples/sec: 0.83, Time/seq 1.20s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.77s, TFLOPs: 8.60, Samples/sec: 0.84, Time/seq 1.19s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 13.83s, TFLOPs: 2.97, Samples/sec: 0.29, Time/seq 3.46s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 5.46s, TFLOPs: 7.53, Samples/sec: 0.73, Time/seq 1.36s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.96s, TFLOPs: 8.27, Samples/sec: 0.81, Time/seq 1.24s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.70s, TFLOPs: 8.74, Samples/sec: 0.85, Time/seq 1.17s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.85s, TFLOPs: 8.47, Samples/sec: 0.83, Time/seq 1.21s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.76s, TFLOPs: 8.63, Samples/sec: 0.84, Time/seq 1.19s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.85s, TFLOPs: 8.46, Samples/sec: 0.82, Time/seq 1.21s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.77s, TFLOPs: 8.61, Samples/sec: 0.84, Time/seq 1.19s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 13.55s, TFLOPs: 3.03, Samples/sec: 0.30, Time/seq 3.39s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.87s, TFLOPs: 8.43, Samples/sec: 0.82, Time/seq 1.22s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.78s, TFLOPs: 8.59, Samples/sec: 0.84, Time/seq 1.19s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.91s, TFLOPs: 8.36, Samples/sec: 0.81, Time/seq 1.23s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.83s, TFLOPs: 8.50, Samples/sec: 0.83, Time/seq 1.21s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.72s, TFLOPs: 8.70, Samples/sec: 0.85, Time/seq 1.18s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.67s, TFLOPs: 8.79, Samples/sec: 0.86, Time/seq 1.17s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.49s, TFLOPs: 9.14, Samples/sec: 0.89, Time/seq 1.12s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 12.95s, TFLOPs: 3.17, Samples/sec: 0.31, Time/seq 3.24s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 5.20s, TFLOPs: 7.90, Samples/sec: 0.77, Time/seq 1.30s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.82s, TFLOPs: 8.53, Samples/sec: 0.83, Time/seq 1.20s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.86s, TFLOPs: 8.45, Samples/sec: 0.82, Time/seq 1.21s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.71s, TFLOPs: 8.72, Samples/sec: 0.85, Time/seq 1.18s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.53s, TFLOPs: 9.07, Samples/sec: 0.88, Time/seq 1.13s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.76s, TFLOPs: 8.63, Samples/sec: 0.84, Time/seq 1.19s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 5.02s, TFLOPs: 8.19, Samples/sec: 0.80, Time/seq 1.25s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 14.00s, TFLOPs: 2.93, Samples/sec: 0.29, Time/seq 3.50s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.95s, TFLOPs: 8.30, Samples/sec: 0.81, Time/seq 1.24s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.65s, TFLOPs: 8.83, Samples/sec: 0.86, Time/seq 1.16s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.91s, TFLOPs: 8.37, Samples/sec: 0.82, Time/seq 1.23s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.96s, TFLOPs: 8.28, Samples/sec: 0.81, Time/seq 1.24s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.72s, TFLOPs: 8.70, Samples/sec: 0.85, Time/seq 1.18s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.52s, TFLOPs: 9.09, Samples/sec: 0.89, Time/seq 1.13s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 5.02s, TFLOPs: 8.18, Samples/sec: 0.80, Time/seq 1.25s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 13.02s, TFLOPs: 3.15, Samples/sec: 0.31, Time/seq 3.25s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 5.06s, TFLOPs: 8.12, Samples/sec: 0.79, Time/seq 1.26s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.85s, TFLOPs: 8.47, Samples/sec: 0.82, Time/seq 1.21s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.65s, TFLOPs: 8.83, Samples/sec: 0.86, Time/seq 1.16s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.77s, TFLOPs: 8.60, Samples/sec: 0.84, Time/seq 1.19s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.72s, TFLOPs: 8.70, Samples/sec: 0.85, Time/seq 1.18s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.62s, TFLOPs: 8.88, Samples/sec: 0.87, Time/seq 1.16s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.56s, TFLOPs: 9.00, Samples/sec: 0.88, Time/seq 1.14s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 13.36s, TFLOPs: 3.07, Samples/sec: 0.30, Time/seq 3.34s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.78s, TFLOPs: 8.58, Samples/sec: 0.84, Time/seq 1.20s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.48s, TFLOPs: 9.17, Samples/sec: 0.89, Time/seq 1.12s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.89s, TFLOPs: 8.40, Samples/sec: 0.82, Time/seq 1.22s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.63s, TFLOPs: 8.86, Samples/sec: 0.86, Time/seq 1.16s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 5.00s, TFLOPs: 8.21, Samples/sec: 0.80, Time/seq 1.25s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.98s, TFLOPs: 8.24, Samples/sec: 0.80, Time/seq 1.25s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.86s, TFLOPs: 8.46, Samples/sec: 0.82, Time/seq 1.21s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 15.21s, TFLOPs: 2.70, Samples/sec: 0.26, Time/seq 3.80s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.88s, TFLOPs: 8.41, Samples/sec: 0.82, Time/seq 1.22s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.61s, TFLOPs: 8.91, Samples/sec: 0.87, Time/seq 1.15s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.62s, TFLOPs: 8.89, Samples/sec: 0.87, Time/seq 1.15s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.62s, TFLOPs: 8.90, Samples/sec: 0.87, Time/seq 1.15s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.59s, TFLOPs: 8.94, Samples/sec: 0.87, Time/seq 1.15s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.83s, TFLOPs: 8.51, Samples/sec: 0.83, Time/seq 1.21s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.80s, TFLOPs: 8.56, Samples/sec: 0.83, Time/seq 1.20s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 14.17s, TFLOPs: 2.90, Samples/sec: 0.28, Time/seq 3.54s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 5.07s, TFLOPs: 8.09, Samples/sec: 0.79, Time/seq 1.27s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.99s, TFLOPs: 8.23, Samples/sec: 0.80, Time/seq 1.25s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.89s, TFLOPs: 8.40, Samples/sec: 0.82, Time/seq 1.22s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.82s, TFLOPs: 8.52, Samples/sec: 0.83, Time/seq 1.20s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.77s, TFLOPs: 8.60, Samples/sec: 0.84, Time/seq 1.19s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.72s, TFLOPs: 8.69, Samples/sec: 0.85, Time/seq 1.18s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.62s, TFLOPs: 8.90, Samples/sec: 0.87, Time/seq 1.15s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 14.05s, TFLOPs: 2.92, Samples/sec: 0.28, Time/seq 3.51s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 5.48s, TFLOPs: 7.49, Samples/sec: 0.73, Time/seq 1.37s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 5.18s, TFLOPs: 7.93, Samples/sec: 0.77, Time/seq 1.29s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 5.14s, TFLOPs: 8.00, Samples/sec: 0.78, Time/seq 1.28s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 5.21s, TFLOPs: 7.88, Samples/sec: 0.77, Time/seq 1.30s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.94s, TFLOPs: 8.31, Samples/sec: 0.81, Time/seq 1.23s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 5.11s, TFLOPs: 8.04, Samples/sec: 0.78, Time/seq 1.28s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 5.26s, TFLOPs: 7.81, Samples/sec: 0.76, Time/seq 1.31s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 14.04s, TFLOPs: 2.92, Samples/sec: 0.28, Time/seq 3.51s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 5.57s, TFLOPs: 7.38, Samples/sec: 0.72, Time/seq 1.39s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 5.21s, TFLOPs: 7.88, Samples/sec: 0.77, Time/seq 1.30s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 5.16s, TFLOPs: 7.96, Samples/sec: 0.78, Time/seq 1.29s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.86s, TFLOPs: 8.45, Samples/sec: 0.82, Time/seq 1.21s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.62s, TFLOPs: 8.89, Samples/sec: 0.87, Time/seq 1.15s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.66s, TFLOPs: 8.81, Samples/sec: 0.86, Time/seq 1.17s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.74s, TFLOPs: 8.67, Samples/sec: 0.84, Time/seq 1.18s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 12.42s, TFLOPs: 3.31, Samples/sec: 0.32, Time/seq 3.11s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.84s, TFLOPs: 8.48, Samples/sec: 0.83, Time/seq 1.21s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.54s, TFLOPs: 9.04, Samples/sec: 0.88, Time/seq 1.14s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.94s, TFLOPs: 8.31, Samples/sec: 0.81, Time/seq 1.24s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.83s, TFLOPs: 8.50, Samples/sec: 0.83, Time/seq 1.21s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.53s, TFLOPs: 9.07, Samples/sec: 0.88, Time/seq 1.13s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.67s, TFLOPs: 8.79, Samples/sec: 0.86, Time/seq 1.17s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 4.59s, TFLOPs: 8.95, Samples/sec: 0.87, Time/seq 1.15s, Batch Size: 4, Sequence Length: 512
+Model Parameters: 6.607 B, Latency: 14.18s, TFLOPs: 2.90, Samples/sec: 0.28, Time/seq 3.54s, Batch Size: 4, Sequence Length: 512
+***** Evaluating perplexity, Epoch 2/2 *****
+ppl: 4.449008941650391, loss: 1.4926813840866089
+[2025-11-23 22:03:02,076] [INFO] [launch.py:367:main] Process 96893 exits successfully.
+[2025-11-23 22:03:03,078] [INFO] [launch.py:367:main] Process 96894 exits successfully.

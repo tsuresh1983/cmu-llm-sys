@@ -28,8 +28,13 @@ from dschat.utils.module.lora import convert_linear_layer_to_lora, convert_lora_
 from dschat.utils.model.model_utils import create_hf_model, causal_lm_model_to_fp32_loss
 from dschat.utils.perf import print_throughput
 
-# For H100 to simulate V100
-torch.cuda.set_per_process_memory_fraction(0.2)  # 0.2 * 80GB = 16GB
+# For Any GPU more than 16GB to limit 16GB
+if torch.cuda.is_available():
+      gpu_memory_gb = torch.cuda.get_device_properties(0).total_memory / (1024**3)
+      target_memory_gb = 16.0
+      memory_fraction = min(target_memory_gb / gpu_memory_gb, 1.0)
+      torch.cuda.set_per_process_memory_fraction(memory_fraction)
+      print(f"GPU Memory: {gpu_memory_gb:.1f}GB, Setting fraction: {memory_fraction:.2f} ({target_memory_gb}GB limit)")
 
 def parse_args():
     parser = argparse.ArgumentParser(

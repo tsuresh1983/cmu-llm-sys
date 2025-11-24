@@ -27,13 +27,13 @@ def main():
     # e.g. dp_size, mem_fraction_static
     
     
-    # TESTED ON 2 x H100 and forced mem_fraction_static to 0.2 to make sure it works on low memory of 16GB
+    # TESTED ON 2 x A100(40 GB) and forced mem_fraction_static to 0.4 to make sure it works on low memory of 16GB
 
     llm = sgl.Engine(
           model_path=model_path,
           tp_size=1,
           dp_size=2,
-          mem_fraction_static=0.2,
+          mem_fraction_static=0.4,
           attention_backend="dual_chunk_flash_attn",
           context_length=16384,
           trust_remote_code=True,
@@ -50,7 +50,7 @@ def main():
     outputs = []
 
     # TODO: you may want to explore different batch_size
-    ### FOR 2x H100
+    ### FOR 2x A100(40GB)
     batch_size = 16
 
     from tqdm import tqdm
