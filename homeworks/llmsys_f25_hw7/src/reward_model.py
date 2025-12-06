@@ -278,14 +278,29 @@ class RewardModelTrainer:
             Loss tensor
         """
         # BEGIN ASSIGN7_1
-        # TODO: Compute rewards for chosen and rejected responses
-        # Get rewards using the model's forward pass
-        # Compute ranking loss: chosen should have higher reward than rejected
         # 1. Get rewards for chosen responses
-        # 2. Get rewards for rejected responses
-        # 3. Compute ranking loss: chosen should have higher reward than rejected
+        chosen_outputs = self.model(
+            input_ids=batch['chosen']['input_ids'],
+            attention_mask=batch['chosen']['attention_mask'],
+            return_dict=True
+        )
+        chosen_rewards = chosen_outputs.rewards
 
-        raise NotImplementedError("Need to implement loss computation for Assignment 7")
+        # 2. Get rewards for rejected responses
+        rejected_outputs = self.model(
+            input_ids=batch['rejected']['input_ids'],
+            attention_mask=batch['rejected']['attention_mask'],
+            return_dict=True
+        )
+        rejected_rewards = rejected_outputs.rewards
+
+        # 3. Compute ranking loss: chosen should have higher reward than rejected
+        # Target = 1 indicates that chosen (first input) should be ranked higher than rejected (second input)
+        # MarginRankingLoss computes: loss = max(0, -target * (input1 - input2) + margin)
+        target = torch.ones_like(chosen_rewards)
+        loss = self.loss_fn(chosen_rewards, rejected_rewards, target)
+
+        return loss, chosen_rewards, rejected_rewards
         # END ASSIGN7_1
     
     def train_step(self, batch: Dict) -> Dict[str, float]:
@@ -399,7 +414,7 @@ def load_reward_model(model_path: str, device: torch.device) -> RewardModel:
     Returns:
         Loaded RewardModel
     """
-    checkpoint = torch.load(model_path, map_location=device)
+    checkpoint = torch.load(model_path, map_location=device, weights_only=False)
     
     # Extract model configuration
     config = checkpoint.get('config')

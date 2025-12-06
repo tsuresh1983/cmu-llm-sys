@@ -9,3 +9,5 @@
 .vscode
 **/*.out
 **/workdir_*
+homeworks/llmsys_f25_hw7/logs
+homeworks/llmsys_f25_hw7/outputs

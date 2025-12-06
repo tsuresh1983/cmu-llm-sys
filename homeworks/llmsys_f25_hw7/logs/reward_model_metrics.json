@@ -1,0 +1,44 @@
+[
+  {
+    "step": 0,
+    "epoch": 0,
+    "train_loss": 0.8898915214753813,
+    "train_accuracy": 0.5911111111111111,
+    "train_chosen_reward_mean": 0.19066925985609284,
+    "train_rejected_reward_mean": 0.03556126695811852,
+    "train_reward_diff": 0.1551079930684581,
+    "val_loss": 0.8323360423071194,
+    "val_accuracy": 0.6050884955752213,
+    "val_chosen_reward_mean": 0.5913743976734381,
+    "val_rejected_reward_mean": 0.34050268000733536,
+    "val_reward_diff": 0.25087171522653207
+  },
+  {
+    "step": 1,
+    "epoch": 1,
+    "train_loss": 0.7400922380387783,
+    "train_accuracy": 0.6831944444444444,
+    "train_chosen_reward_mean": 0.41257882290209336,
+    "train_rejected_reward_mean": -0.03119344422024571,
+    "train_reward_diff": 0.4437722679393159,
+    "val_loss": 0.8422658195537803,
+    "val_accuracy": 0.5962389380530974,
+    "val_chosen_reward_mean": 0.029105756876874812,
+    "val_rejected_reward_mean": -0.22557232594859283,
+    "val_reward_diff": 0.25467808295733635
+  },
+  {
+    "step": 2,
+    "epoch": 2,
+    "train_loss": 0.5183147753443983,
+    "train_accuracy": 0.7865277777777778,
+    "train_chosen_reward_mean": 0.8872014089156356,
+    "train_rejected_reward_mean": -0.08977563915153344,
+    "train_reward_diff": 0.9769770509811739,
+    "val_loss": 0.9495803771820743,
+    "val_accuracy": 0.5763274336283186,
+    "val_chosen_reward_mean": 0.02217212220472572,
+    "val_rejected_reward_mean": -0.309596422301457,
+    "val_reward_diff": 0.3317685458908039
+  }
+]

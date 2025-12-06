@@ -1,0 +1,140 @@
+2025-12-06 14:42:11,839 - utils - INFO - Logging configured. Log file: logs/model_evaluation_20251206_144211.log
+2025-12-06 14:42:11,846 - utils - INFO - Set random seed to 42
+2025-12-06 14:42:11,846 - utils - INFO - Using device: cuda
+2025-12-06 14:42:11,847 - utils - INFO - Loading evaluation prompts...
+2025-12-06 14:42:11,850 - utils - INFO - Loaded 500 entries from data/eval_prompts.json
+2025-12-06 14:42:11,851 - utils - INFO - Evaluating on 100 prompts
+2025-12-06 14:42:11,851 - utils - INFO - Loading reward model from outputs/reward_model/best_reward_model.pt
+2025-12-06 14:42:13,209 - reward_model - INFO - Created reward model based on distilbert-base-uncased
+2025-12-06 14:42:13,210 - reward_model - INFO - Model parameters: 67,249,153
+2025-12-06 14:42:14,526 - reward_model - INFO - Loaded reward model from outputs/reward_model/best_reward_model.pt
+2025-12-06 14:42:14,961 - utils - INFO - Loading base model: gpt2
+2025-12-06 14:42:16,202 - utils - INFO - Loading RLHF model from outputs/rlhf_model/best_rlhf_model
+2025-12-06 14:42:16,809 - utils - INFO - Comparing base model vs RLHF model...
+2025-12-06 14:42:16,809 - __main__ - INFO - Evaluating base model...
+2025-12-06 14:42:16,809 - __main__ - INFO - Evaluating model on 100 prompts...
+2025-12-06 14:44:54,764 - __main__ - INFO - Evaluating RLHF model...
+2025-12-06 14:44:54,765 - __main__ - INFO - Evaluating model on 100 prompts...
+2025-12-06 14:47:25,019 - utils - INFO - Evaluation Results:
+2025-12-06 14:47:25,019 - utils - INFO - ==================================================
+2025-12-06 14:47:25,020 - utils - INFO - Base Model Results:
+2025-12-06 14:47:25,020 - utils - INFO -   mean_reward: 0.0224
+2025-12-06 14:47:25,020 - utils - INFO -   std_reward: 0.7632
+2025-12-06 14:47:25,020 - utils - INFO -   median_reward: -0.1608
+2025-12-06 14:47:25,020 - utils - INFO -   min_reward: -1.2341
+2025-12-06 14:47:25,020 - utils - INFO -   max_reward: 2.1203
+2025-12-06 14:47:25,020 - utils - INFO -   mean_response_length: 112.5633
+2025-12-06 14:47:25,020 - utils - INFO -   std_response_length: 35.2368
+2025-12-06 14:47:25,020 - utils - INFO -   num_prompts: 100
+2025-12-06 14:47:25,020 - utils - INFO -   num_samples: 300
+2025-12-06 14:47:25,020 - utils - INFO -   samples_per_prompt: 3
+2025-12-06 14:47:25,020 - utils - INFO -   reward_p10: -0.8060
+2025-12-06 14:47:25,020 - utils - INFO -   reward_p25: -0.5880
+2025-12-06 14:47:25,020 - utils - INFO -   reward_p75: 0.4298
+2025-12-06 14:47:25,020 - utils - INFO -   reward_p90: 1.2400
+2025-12-06 14:47:25,020 - utils - INFO -   response_mean_word_count: 112.5633
+2025-12-06 14:47:25,020 - utils - INFO -   response_std_word_count: 35.2368
+2025-12-06 14:47:25,020 - utils - INFO -   response_mean_char_count: 615.0500
+2025-12-06 14:47:25,020 - utils - INFO -   response_std_char_count: 185.1212
+2025-12-06 14:47:25,020 - utils - INFO -   response_mean_token_count: 152.7267
+2025-12-06 14:47:25,020 - utils - INFO -   response_std_token_count: 47.2928
+2025-12-06 14:47:25,020 - utils - INFO -   response_min_word_count: 17
+2025-12-06 14:47:25,020 - utils - INFO -   response_max_word_count: 212
+2025-12-06 14:47:25,020 - utils - INFO -   response_num_texts: 300
+2025-12-06 14:47:25,020 - utils - INFO - 
+RLHF Model Results:
+2025-12-06 14:47:25,021 - utils - INFO -   mean_reward: 1.5075
+2025-12-06 14:47:25,021 - utils - INFO -   std_reward: 0.4956
+2025-12-06 14:47:25,021 - utils - INFO -   median_reward: 1.6189
+2025-12-06 14:47:25,021 - utils - INFO -   min_reward: -0.3070
+2025-12-06 14:47:25,021 - utils - INFO -   max_reward: 2.1010
+2025-12-06 14:47:25,021 - utils - INFO -   mean_response_length: 70.1033
+2025-12-06 14:47:25,021 - utils - INFO -   std_response_length: 21.9428
+2025-12-06 14:47:25,021 - utils - INFO -   num_prompts: 100
+2025-12-06 14:47:25,021 - utils - INFO -   num_samples: 300
+2025-12-06 14:47:25,021 - utils - INFO -   samples_per_prompt: 3
+2025-12-06 14:47:25,021 - utils - INFO -   reward_p10: 0.7893
+2025-12-06 14:47:25,021 - utils - INFO -   reward_p25: 1.1153
+2025-12-06 14:47:25,021 - utils - INFO -   reward_p75: 1.9271
+2025-12-06 14:47:25,021 - utils - INFO -   reward_p90: 2.0517
+2025-12-06 14:47:25,021 - utils - INFO -   response_mean_word_count: 70.1033
+2025-12-06 14:47:25,021 - utils - INFO -   response_std_word_count: 21.9428
+2025-12-06 14:47:25,021 - utils - INFO -   response_mean_char_count: 535.6733
+2025-12-06 14:47:25,021 - utils - INFO -   response_std_char_count: 148.5860
+2025-12-06 14:47:25,021 - utils - INFO -   response_mean_token_count: 147.0833
+2025-12-06 14:47:25,021 - utils - INFO -   response_std_token_count: 40.1248
+2025-12-06 14:47:25,021 - utils - INFO -   response_min_word_count: 41
+2025-12-06 14:47:25,021 - utils - INFO -   response_max_word_count: 181
+2025-12-06 14:47:25,021 - utils - INFO -   response_num_texts: 300
+2025-12-06 14:47:25,021 - utils - INFO - 
+Improvements:
+2025-12-06 14:47:25,021 - utils - INFO -   mean_reward_improvement_pct: 6642.8039
+2025-12-06 14:47:25,021 - utils - INFO -   mean_reward_improvement_abs: 1.4852
+2025-12-06 14:47:25,021 - utils - INFO -   std_reward_improvement_pct: -35.0552
+2025-12-06 14:47:25,021 - utils - INFO -   std_reward_improvement_abs: -0.2675
+2025-12-06 14:47:25,021 - utils - INFO -   median_reward_improvement_pct: 1106.9695
+2025-12-06 14:47:25,022 - utils - INFO -   median_reward_improvement_abs: 1.7797
+2025-12-06 14:47:25,022 - utils - INFO -   min_reward_improvement_pct: 75.1192
+2025-12-06 14:47:25,022 - utils - INFO -   min_reward_improvement_abs: 0.9270
+2025-12-06 14:47:25,022 - utils - INFO -   max_reward_improvement_pct: -0.9100
+2025-12-06 14:47:25,022 - utils - INFO -   max_reward_improvement_abs: -0.0193
+2025-12-06 14:47:25,022 - utils - INFO -   mean_response_length_improvement_pct: -37.7210
+2025-12-06 14:47:25,022 - utils - INFO -   mean_response_length_improvement_abs: -42.4600
+2025-12-06 14:47:25,022 - utils - INFO -   std_response_length_improvement_pct: -37.7276
+2025-12-06 14:47:25,022 - utils - INFO -   std_response_length_improvement_abs: -13.2940
+2025-12-06 14:47:25,022 - utils - INFO -   num_prompts_improvement_pct: 0.0000
+2025-12-06 14:47:25,022 - utils - INFO -   num_samples_improvement_pct: 0.0000
+2025-12-06 14:47:25,022 - utils - INFO -   samples_per_prompt_improvement_pct: 0.0000
+2025-12-06 14:47:25,022 - utils - INFO -   reward_p10_improvement_pct: 197.9335
+2025-12-06 14:47:25,022 - utils - INFO -   reward_p10_improvement_abs: 1.5953
+2025-12-06 14:47:25,022 - utils - INFO -   reward_p25_improvement_pct: 289.6667
+2025-12-06 14:47:25,022 - utils - INFO -   reward_p25_improvement_abs: 1.7033
+2025-12-06 14:47:25,022 - utils - INFO -   reward_p75_improvement_pct: 348.4139
+2025-12-06 14:47:25,022 - utils - INFO -   reward_p75_improvement_abs: 1.4973
+2025-12-06 14:47:25,022 - utils - INFO -   reward_p90_improvement_pct: 65.4687
+2025-12-06 14:47:25,022 - utils - INFO -   reward_p90_improvement_abs: 0.8118
+2025-12-06 14:47:25,022 - utils - INFO -   response_mean_word_count_improvement_pct: -37.7210
+2025-12-06 14:47:25,022 - utils - INFO -   response_mean_word_count_improvement_abs: -42.4600
+2025-12-06 14:47:25,022 - utils - INFO -   response_std_word_count_improvement_pct: -37.7276
+2025-12-06 14:47:25,022 - utils - INFO -   response_std_word_count_improvement_abs: -13.2940
+2025-12-06 14:47:25,022 - utils - INFO -   response_mean_char_count_improvement_pct: -12.9057
+2025-12-06 14:47:25,022 - utils - INFO -   response_mean_char_count_improvement_abs: -79.3767
+2025-12-06 14:47:25,022 - utils - INFO -   response_std_char_count_improvement_pct: -19.7358
+2025-12-06 14:47:25,022 - utils - INFO -   response_std_char_count_improvement_abs: -36.5352
+2025-12-06 14:47:25,022 - utils - INFO -   response_mean_token_count_improvement_pct: -3.6951
+2025-12-06 14:47:25,022 - utils - INFO -   response_mean_token_count_improvement_abs: -5.6433
+2025-12-06 14:47:25,022 - utils - INFO -   response_std_token_count_improvement_pct: -15.1568
+2025-12-06 14:47:25,022 - utils - INFO -   response_std_token_count_improvement_abs: -7.1681
+2025-12-06 14:47:25,023 - utils - INFO -   response_min_word_count_improvement_pct: 141.1765
+2025-12-06 14:47:25,023 - utils - INFO -   response_max_word_count_improvement_pct: -14.6226
+2025-12-06 14:47:25,023 - utils - INFO -   response_num_texts_improvement_pct: 0.0000
+2025-12-06 14:47:25,573 - utils - INFO - Saved reward distribution plot to plots/base_model_rewards.png
+2025-12-06 14:47:26,069 - utils - INFO - Saved reward distribution plot to plots/rlhf_model_rewards.png
+2025-12-06 14:47:26,782 - utils - INFO - Saved 300 entries to evaluation_results/base_model_outputs.json
+2025-12-06 14:47:26,782 - utils - INFO - Saved 300 outputs to evaluation_results/base_model_outputs.json
+2025-12-06 14:47:26,793 - utils - INFO - Saved 300 entries to evaluation_results/rlhf_model_outputs.json
+2025-12-06 14:47:26,793 - utils - INFO - Saved 300 outputs to evaluation_results/rlhf_model_outputs.json
+2025-12-06 14:47:26,794 - utils - INFO - Saved 10 entries to evaluation_results/side_by_side_comparison.json
+2025-12-06 14:47:26,794 - utils - INFO - Saved model comparison to evaluation_results/side_by_side_comparison.json
+2025-12-06 14:47:26,795 - utils - INFO - Saved 1 entries to evaluation_results/evaluation_summary.json
+2025-12-06 14:47:26,795 - utils - INFO - Saved summary report to evaluation_results/evaluation_summary.json
+2025-12-06 14:47:26,795 - utils - INFO - 
+============================================================
+2025-12-06 14:47:26,795 - utils - INFO - EVALUATION SUMMARY
+2025-12-06 14:47:26,795 - utils - INFO - ============================================================
+2025-12-06 14:47:26,795 - utils - INFO - Number of prompts evaluated: 100
+2025-12-06 14:47:26,795 - utils - INFO - Samples per prompt: 3
+2025-12-06 14:47:26,795 - utils - INFO - Total samples: 300
+2025-12-06 14:47:26,795 - utils - INFO - 
+2025-12-06 14:47:26,796 - utils - INFO - Base Model Average Reward: 0.0224 ± 0.7632
+2025-12-06 14:47:26,796 - utils - INFO - RLHF Model Average Reward: 1.5075 ± 0.4956
+2025-12-06 14:47:26,796 - utils - INFO - Average Improvement: 1.4852
+2025-12-06 14:47:26,796 - utils - INFO - Improvement Percentage: 6642.80%
+2025-12-06 14:47:26,796 - utils - INFO - 
+2025-12-06 14:47:26,796 - utils - INFO - Percentage of samples improved: 94.0%
+2025-12-06 14:47:26,796 - utils - INFO - Max improvement: 3.0905
+2025-12-06 14:47:26,796 - utils - INFO - Max degradation: -1.2547
+2025-12-06 14:47:26,796 - utils - INFO - 
+Evaluation completed successfully!
+2025-12-06 14:47:26,796 - utils - INFO - Results saved to: evaluation_results/
+2025-12-06 14:47:26,797 - utils - INFO - Plots saved to: plots/

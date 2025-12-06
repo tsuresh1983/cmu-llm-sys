@@ -1,0 +1,39 @@
+[
+  {
+    "training_summary": {
+      "training_time_seconds": 12164.76885175705,
+      "training_time_minutes": 202.74614752928417,
+      "training_time_hours": 3.3791024588214027
+    },
+    "base_model_metrics": {
+      "mean_reward": 0.04560981075838208,
+      "std_reward": 0.7531662583351135,
+      "min_reward": -1.315313696861267,
+      "max_reward": 2.123008966445923,
+      "mean_response_length": 116.57866666666666,
+      "num_evaluations": 1500
+    },
+    "rlhf_model_metrics": {
+      "mean_reward": 1.5208917069725691,
+      "std_reward": 0.5359135270118713,
+      "min_reward": -0.8843362331390381,
+      "max_reward": 2.1490964889526367,
+      "mean_response_length": 69.554,
+      "num_evaluations": 2500
+    },
+    "improvements": {
+      "mean_reward_improvement_pct": 3234.5714040110606,
+      "mean_reward_improvement_abs": 1.4752818962141871,
+      "std_reward_improvement_pct": -28.845255469022597,
+      "std_reward_improvement_abs": -0.2172527313232422,
+      "min_reward_improvement_pct": 32.766135162332034,
+      "min_reward_improvement_abs": 0.430977463722229,
+      "max_reward_improvement_pct": 1.2287994501684252,
+      "max_reward_improvement_abs": 0.026087522506713867,
+      "mean_response_length_improvement_pct": -40.33728297916142,
+      "mean_response_length_improvement_abs": -47.02466666666666,
+      "num_evaluations_improvement_pct": 66.66666666666666,
+      "num_evaluations_improvement_abs": 1000
+    }
+  }
+]
